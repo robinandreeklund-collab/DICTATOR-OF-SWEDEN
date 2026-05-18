@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type {
+  CampaignClientAction,
   ClientAction,
+  GameMode,
   GameSettings,
   JoinResult,
   RoomSnapshot,
@@ -48,13 +50,19 @@ interface AppState {
   submitValkompass: (answers: Record<string, AnswerKey>) => void;
   setParty: (partyId: string) => void;
   setReady: (ready: boolean) => void;
-  addBot: () => void;
+  addBot: (teamIndex?: number) => void;
   removeBot: (botId: string) => void;
   updateSettings: (settings: GameSettings) => void;
+  setMode: (mode: GameMode) => void;
+  setNumTeams: (numTeams: number) => void;
+  setTeamParty: (teamIndex: number, partyId: string) => void;
+  joinTeam: (teamIndex: number) => void;
   startGame: () => void;
   restartGame: () => void;
   sendAction: (action: ClientAction) => void;
+  sendCampaignAction: (action: CampaignClientAction) => void;
   sendChat: (text: string) => void;
+  sendTeamChat: (text: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => {
@@ -118,12 +126,19 @@ export const useStore = create<AppState>((set, get) => {
     submitValkompass: (answers) => socket.emit('lobby:valkompass', { answers }),
     setParty: (partyId) => socket.emit('lobby:setParty', { partyId }),
     setReady: (ready) => socket.emit('lobby:setReady', { ready }),
-    addBot: () => socket.emit('lobby:addBot'),
+    addBot: (teamIndex) => socket.emit('lobby:addBot', { teamIndex }),
     removeBot: (botId) => socket.emit('lobby:removeBot', { botId }),
     updateSettings: (settings) => socket.emit('lobby:settings', { settings }),
+    setMode: (mode) => socket.emit('lobby:setMode', { mode }),
+    setNumTeams: (numTeams) => socket.emit('lobby:setNumTeams', { numTeams }),
+    setTeamParty: (teamIndex, partyId) =>
+      socket.emit('lobby:setTeamParty', { teamIndex, partyId }),
+    joinTeam: (teamIndex) => socket.emit('lobby:joinTeam', { teamIndex }),
     startGame: () => socket.emit('lobby:start'),
     restartGame: () => socket.emit('game:restart'),
     sendAction: (action) => socket.emit('game:action', { action }),
+    sendCampaignAction: (action) => socket.emit('game:campaignAction', { action }),
     sendChat: (text) => socket.emit('chat:send', { text }),
+    sendTeamChat: (text) => socket.emit('chat:sendTeam', { text }),
   };
 });

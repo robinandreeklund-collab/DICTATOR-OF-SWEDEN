@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PARTIES, getParty } from '@dos/shared';
+import { PARTIES, getParty, type LobbyView } from '@dos/shared';
 import { useStore } from '../store.js';
 import { Valkompass } from '../components/Valkompass.js';
 import { Chat } from '../components/Chat.js';
@@ -9,17 +9,10 @@ export function Lobby() {
   const lobby = snapshot.lobby!;
   const me = lobby.players.find((p) => p.id === snapshot.you.id);
   const isHost = snapshot.you.isHost;
+  const isCampaign = lobby.mode === 'campaign';
 
-  const setParty = useStore((s) => s.setParty);
-  const setReady = useStore((s) => s.setReady);
-  const addBot = useStore((s) => s.addBot);
-  const removeBot = useStore((s) => s.removeBot);
-  const updateSettings = useStore((s) => s.updateSettings);
-  const startGame = useStore((s) => s.startGame);
-  const leaveRoom = useStore((s) => s.leaveRoom);
-
+  const store = useStore();
   const [vkOpen, setVkOpen] = useState(false);
-  const [rulesOpen, setRulesOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const copyCode = () => {
@@ -41,164 +34,91 @@ export function Lobby() {
             Rumskod: <strong>{snapshot.roomCode}</strong> {copied ? '✓' : '⧉'}
           </button>
         </div>
-        <button className="btn btn-ghost btn-small" onClick={leaveRoom}>
-          Lämna
+        <button className="btn btn-ghost btn-small" onClick={store.leaveRoom}>
+          Lamna
         </button>
       </header>
 
       <div className="lobby-grid">
         <div className="lobby-main">
-          {/* Valkompass / partival */}
-          {vkOpen ? (
-            <Valkompass onClose={() => setVkOpen(false)} />
-          ) : (
-            <section className="card">
-              <div className="section-head">
-                <h2>Ditt parti</h2>
-                {!me?.valkompassDone && (
-                  <button className="btn btn-small btn-primary" onClick={() => setVkOpen(true)}>
-                    Ta valkompassen
-                  </button>
-                )}
-                {me?.valkompassDone && (
-                  <button className="btn btn-small btn-ghost" onClick={() => setVkOpen(true)}>
-                    Gör om valkompassen
-                  </button>
-                )}
-              </div>
-              <p className="muted small">
-                Valkompassen matchar dig med ett riksdagsparti utifrån valfrågorna
-                2026. Partiet är offentlig spelfärg — din hemliga roll delas ut separat.
-              </p>
-              <div className="party-grid">
-                {PARTIES.map((party) => {
-                  const selected = me?.partyId === party.id;
-                  const suggested = me?.suggestedPartyId === party.id;
-                  return (
-                    <button
-                      key={party.id}
-                      className={`party-card ${selected ? 'party-selected' : ''}`}
-                      style={{ borderColor: selected ? party.color : undefined }}
-                      onClick={() => setParty(party.id)}
-                    >
-                      <span className="party-mark" style={{ background: party.color }}>
-                        {party.shortName}
-                      </span>
-                      <span className="party-name">{party.name}</span>
-                      {suggested && <span className="party-suggested">Din match</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Spelare */}
           <section className="card">
-            <div className="section-head">
-              <h2>
-                Ledamöter {lobby.players.length}/{lobby.maxPlayers}
-              </h2>
-              {isHost && lobby.players.length < lobby.maxPlayers && (
-                <button className="btn btn-small" onClick={addBot}>
-                  + Lägg till bot
-                </button>
-              )}
+            <h2>Spellage</h2>
+            <div className="mode-picker">
+              <button
+                className={`mode-card ${isCampaign ? 'mode-on' : ''}`}
+                disabled={!isHost}
+                onClick={() => store.setMode('campaign')}
+              >
+                <span className="mode-name">Valrorelsen 2026</span>
+                <span className="mode-desc">
+                  Partilag tavlar i en kampanjduell over hela Sverige. En hemlig
+                  mullvad i varje lag.
+                </span>
+              </button>
+              <button
+                className={`mode-card ${!isCampaign ? 'mode-on' : ''}`}
+                disabled={!isHost}
+                onClick={() => store.setMode('classic')}
+              >
+                <span className="mode-name">Riksdagen</span>
+                <span className="mode-desc">
+                  Klassiskt socialt deduktionsspel. Hitta diktatorn innan
+                  demokratin faller.
+                </span>
+              </button>
             </div>
-            <ul className="player-list">
-              {lobby.players.map((p) => {
-                const party = p.partyId ? getParty(p.partyId) : null;
-                return (
-                  <li key={p.id} className="player-row">
-                    <span
-                      className="player-mark"
-                      style={{ background: party ? party.color : '#5a6270' }}
-                    >
-                      {party ? party.shortName : '–'}
-                    </span>
-                    <span className="player-name">
-                      {p.name}
-                      {p.id === snapshot.you.id && <em> (du)</em>}
-                    </span>
-                    <span className="player-tags">
-                      {p.isHost && <span className="tag tag-host">Värd</span>}
-                      {p.isBot && <span className="tag tag-bot">Bot</span>}
-                      {!p.connected && <span className="tag tag-off">Frånvarande</span>}
-                      {p.ready ? (
-                        <span className="tag tag-ready">Redo</span>
-                      ) : (
-                        <span className="tag">Väntar</span>
-                      )}
-                    </span>
-                    {isHost && p.isBot && (
-                      <button
-                        className="icon-btn"
-                        title="Ta bort bot"
-                        onClick={() => removeBot(p.id)}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+            {!isHost && <p className="muted small">Varden valjer spellage.</p>}
           </section>
 
-          {/* Redo + start */}
+          {isCampaign ? (
+            <CampaignSetup lobby={lobby} meId={snapshot.you.id} isHost={isHost} />
+          ) : (
+            <ClassicSetup
+              lobby={lobby}
+              meId={snapshot.you.id}
+              isHost={isHost}
+              vkOpen={vkOpen}
+              setVkOpen={setVkOpen}
+            />
+          )}
+
           <section className="card">
             {me && !me.isBot && (
               <label className="ready-toggle">
                 <input
                   type="checkbox"
                   checked={me.ready}
-                  disabled={!me.partyId}
-                  onChange={(e) => setReady(e.target.checked)}
+                  disabled={isCampaign ? me.teamIndex === null : !me.partyId}
+                  onChange={(e) => store.setReady(e.target.checked)}
                 />
                 <span>
-                  Jag är redo att spela
-                  {!me.partyId && <em className="muted"> — välj ett parti först</em>}
+                  Jag ar redo att spela
+                  {isCampaign && me.teamIndex === null && (
+                    <em className="muted"> — ga med i ett lag forst</em>
+                  )}
+                  {!isCampaign && !me.partyId && (
+                    <em className="muted"> — valj ett parti forst</em>
+                  )}
                 </span>
               </label>
             )}
-
             {isHost && (
-              <div className="host-controls">
-                <label className="ready-toggle">
-                  <input
-                    type="checkbox"
-                    checked={lobby.settings.hiddenVotes}
-                    onChange={(e) =>
-                      updateSettings({
-                        ...lobby.settings,
-                        hiddenVotes: e.target.checked,
-                      })
-                    }
-                  />
-                  <span>Dolda röster (visa bara summan, inte vem som röstade vad)</span>
-                </label>
+              <>
                 <button
                   className="btn btn-primary btn-big"
                   disabled={!lobby.canStart}
-                  onClick={startGame}
+                  onClick={store.startGame}
                 >
                   Starta spelet
                 </button>
                 {lobby.startBlockedReason && (
                   <p className="muted small">{lobby.startBlockedReason}</p>
                 )}
-              </div>
+              </>
             )}
             {!isHost && (
-              <p className="muted small">Värden startar spelet när alla är redo.</p>
+              <p className="muted small">Varden startar spelet nar alla ar redo.</p>
             )}
-          </section>
-
-          <section className="card">
-            <button className="rules-toggle" onClick={() => setRulesOpen(!rulesOpen)}>
-              {rulesOpen ? '▾' : '▸'} Så spelas Dictator of Sweden
-            </button>
-            {rulesOpen && <RulesText />}
           </section>
         </div>
 
@@ -210,28 +130,208 @@ export function Lobby() {
   );
 }
 
-function RulesText() {
+// --- kampanjuppstallning ----------------------------------------------------
+
+function CampaignSetup({
+  lobby,
+  meId,
+  isHost,
+}: {
+  lobby: LobbyView;
+  meId: string;
+  isHost: boolean;
+}) {
+  const store = useStore();
+  const cfg = lobby.campaign;
+
   return (
-    <div className="rules-text">
-      <p>
-        <strong>Mål.</strong> Demokraterna försvarar 5 grundläggande rättigheter.
-        Antidemokraterna — diktatorn och medlöparna — vill få igenom 6
-        antidemokratiska lagar, eller få diktatorn vald till talman sent i spelet.
+    <section className="card">
+      <div className="section-head">
+        <h2>Partilag</h2>
+        {isHost && (
+          <div className="row">
+            <span className="muted small">Antal lag:</span>
+            {[3, 4].map((n) => (
+              <button
+                key={n}
+                className={`btn btn-small ${cfg.numTeams === n ? 'camp-issue-on' : ''}`}
+                onClick={() => store.setNumTeams(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="team-setup">
+        {cfg.teamParties.map((partyId, idx) => {
+          const party = getParty(partyId);
+          const members = lobby.players.filter((p) => p.teamIndex === idx);
+          const iAmHere = members.some((p) => p.id === meId);
+          return (
+            <div
+              key={idx}
+              className="team-card"
+              style={{ borderColor: party.color }}
+            >
+              <div className="team-card-head" style={{ background: party.color }}>
+                <span>Lag {idx + 1}</span>
+                <strong>{party.name}</strong>
+              </div>
+              {isHost && (
+                <select
+                  className="team-party-select"
+                  value={partyId}
+                  onChange={(e) => store.setTeamParty(idx, e.target.value)}
+                >
+                  {PARTIES.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <ul className="team-members">
+                {members.map((p) => (
+                  <li key={p.id}>
+                    {p.name}
+                    {p.id === meId && <em> (du)</em>}
+                    {p.isHost && <span className="tag tag-host">Vard</span>}
+                    {p.isBot && <span className="tag tag-bot">Bot</span>}
+                    {isHost && p.isBot && (
+                      <button className="icon-btn" onClick={() => store.removeBot(p.id)}>
+                        ×
+                      </button>
+                    )}
+                  </li>
+                ))}
+                {members.length === 0 && (
+                  <li className="muted small">Tomt — fylls med bottar.</li>
+                )}
+              </ul>
+              <div className="team-card-actions">
+                {!iAmHere && (
+                  <button className="btn btn-small btn-primary" onClick={() => store.joinTeam(idx)}>
+                    Ga med
+                  </button>
+                )}
+                {isHost && members.length < 5 && (
+                  <button className="btn btn-small" onClick={() => store.addBot(idx)}>
+                    + Bot
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="muted small">
+        Varje lag fylls automatiskt till tre medlemmar med bottar vid start. En
+        slumpad medlem i varje lag blir hemlig mullvad.
       </p>
-      <p>
-        <strong>Rundan.</strong> Statsministern roterar och nominerar en talman.
-        Riksdagen röstar. En vald regering drar tre lagförslag — statsministern
-        slänger ett, talmannen antar ett av de två kvarvarande.
-      </p>
-      <p>
-        <strong>Maktbefogenheter.</strong> När antidemokratiska lagar staplas får
-        statsministern verktyg: granska kortleken, utreda en ledamot, utlysa
-        extraval eller avsätta någon ur riksdagen.
-      </p>
-      <p>
-        <strong>Slutledning.</strong> Demokraterna måste lista ut vem diktatorn är
-        — antidemokraterna måste vilseleda. Prata, anklaga, bluffa.
-      </p>
-    </div>
+    </section>
+  );
+}
+
+// --- klassisk uppstallning --------------------------------------------------
+
+function ClassicSetup({
+  lobby,
+  meId,
+  isHost,
+  vkOpen,
+  setVkOpen,
+}: {
+  lobby: LobbyView;
+  meId: string;
+  isHost: boolean;
+  vkOpen: boolean;
+  setVkOpen: (v: boolean) => void;
+}) {
+  const store = useStore();
+  const me = lobby.players.find((p) => p.id === meId);
+
+  return (
+    <>
+      {vkOpen ? (
+        <Valkompass onClose={() => setVkOpen(false)} />
+      ) : (
+        <section className="card">
+          <div className="section-head">
+            <h2>Ditt parti</h2>
+            <button className="btn btn-small btn-primary" onClick={() => setVkOpen(true)}>
+              {me?.valkompassDone ? 'Gor om valkompassen' : 'Ta valkompassen'}
+            </button>
+          </div>
+          <div className="party-grid">
+            {PARTIES.map((party) => {
+              const selected = me?.partyId === party.id;
+              const suggested = me?.suggestedPartyId === party.id;
+              return (
+                <button
+                  key={party.id}
+                  className={`party-card ${selected ? 'party-selected' : ''}`}
+                  style={{ borderColor: selected ? party.color : undefined }}
+                  onClick={() => store.setParty(party.id)}
+                >
+                  <span className="party-mark" style={{ background: party.color }}>
+                    {party.shortName}
+                  </span>
+                  <span className="party-name">{party.name}</span>
+                  {suggested && <span className="party-suggested">Din match</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section className="card">
+        <div className="section-head">
+          <h2>
+            Ledamoter {lobby.players.length}/{lobby.maxPlayers}
+          </h2>
+          {isHost && lobby.players.length < lobby.maxPlayers && (
+            <button className="btn btn-small" onClick={() => store.addBot()}>
+              + Lagg till bot
+            </button>
+          )}
+        </div>
+        <ul className="player-list">
+          {lobby.players.map((p) => {
+            const party = p.partyId ? getParty(p.partyId) : null;
+            return (
+              <li key={p.id} className="player-row">
+                <span
+                  className="player-mark"
+                  style={{ background: party ? party.color : '#5a6270' }}
+                >
+                  {party ? party.shortName : '–'}
+                </span>
+                <span className="player-name">
+                  {p.name}
+                  {p.id === meId && <em> (du)</em>}
+                </span>
+                <span className="player-tags">
+                  {p.isHost && <span className="tag tag-host">Vard</span>}
+                  {p.isBot && <span className="tag tag-bot">Bot</span>}
+                  {p.ready ? (
+                    <span className="tag tag-ready">Redo</span>
+                  ) : (
+                    <span className="tag">Vantar</span>
+                  )}
+                </span>
+                {isHost && p.isBot && (
+                  <button className="icon-btn" onClick={() => store.removeBot(p.id)}>
+                    ×
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </>
   );
 }

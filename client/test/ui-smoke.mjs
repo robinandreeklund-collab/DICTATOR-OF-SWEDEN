@@ -1,5 +1,5 @@
-// UI-roktest: oppnar klienten i en riktig webblasare, skapar ett rum,
-// fyller med bottar och spelar ett helt parti via grafiska granssnittet.
+// UI-roktest: oppnar klienten i en riktig webblasare och spelar igenom
+// kampanjlaget Valrorelsen 2026 via det grafiska granssnittet.
 // Kraver att servern kor (helst med DOS_FAST=1) pa DOS_URL.
 
 import { chromium } from 'playwright';
@@ -12,13 +12,21 @@ function fail(msg) {
 }
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
+const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
 const consoleErrors = [];
-
 page.on('console', (m) => {
   if (m.type() === 'error') consoleErrors.push(m.text());
 });
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`));
+
+const has = async (sel) => (await page.locator(sel).count()) > 0;
+const clickIf = async (sel) => {
+  if (await has(sel)) {
+    await page.locator(sel).first().click().catch(() => {});
+    return true;
+  }
+  return false;
+};
 
 try {
   await page.goto(URL, { waitUntil: 'networkidle' });
@@ -29,28 +37,17 @@ try {
   await page.getByPlaceholder('t.ex. Robin').fill('UI-Testare');
   await page.getByRole('button', { name: 'Skapa lobby' }).click();
 
-  // --- Lobby ---
+  // --- Lobby (kampanjlaget ar standard) ---
   await page.getByRole('heading', { name: 'Lobby' }).waitFor({ timeout: 8000 });
-  console.log('  Lobby renderad.');
+  await page.locator('.team-card').first().waitFor({ timeout: 8000 });
+  console.log('  Lobby + laguppstallning renderad.');
 
-  // Lagg till 4 bottar.
-  for (let i = 0; i < 4; i++) {
-    await page.getByRole('button', { name: '+ Lägg till bot' }).click();
-    await page.waitForTimeout(150);
-  }
+  // Ga med i lag 1.
+  await page.locator('.team-card').first().getByRole('button', { name: 'Ga med' }).click();
+  await page.waitForTimeout(300);
 
-  // Valj parti (forsta partikortet).
-  await page.locator('.party-card').first().click();
-  await page.waitForTimeout(150);
-
-  // Bli redo (checkboxen ar React-styrd och uppdateras via servern).
+  // Bli redo.
   await page.locator('.ready-toggle input').first().click();
-  await page
-    .locator('.ready-toggle input')
-    .first()
-    .waitFor({ state: 'attached' });
-
-  // Starta spelet - vanta tills knappen blir aktiv.
   const startBtn = page.getByRole('button', { name: 'Starta spelet' });
   await startBtn.waitFor();
   for (let i = 0; i < 30; i++) {
@@ -59,61 +56,54 @@ try {
   }
   if (await startBtn.isDisabled()) fail('Startknappen blev aldrig aktiv.');
   await startBtn.click();
-  console.log('  Spelet startat.');
+  console.log('  Kampanjen startad.');
 
   // --- Rollutdelning ---
   await page.locator('.reveal-overlay').waitFor({ timeout: 8000 });
   console.log('  Rollutdelning visas.');
 
-  // --- Spelvy ---
-  await page.locator('.board').waitFor({ timeout: 12000 });
-  console.log('  Spelbordet renderat.');
+  // --- Kampanjskarmen ---
+  await page.locator('.sweden-map').waitFor({ timeout: 14000 });
+  if (!(await has('.riksdag-arc'))) fail('Riksdagsgrafiken renderades inte.');
+  if (!(await has('.poll-bars'))) fail('Opinionsstaplarna renderades inte.');
+  console.log('  Karta, riksdagsgrafik och opinionsstaplar renderade.');
 
-  // Spela igenom: klicka pa det som dyker upp tills spelet ar slut.
-  const deadline = Date.now() + 90_000;
-  let lastAction = '';
+  // Spela igenom kampanjen.
+  const deadline = Date.now() + 110_000;
   while (Date.now() < deadline) {
-    if (await page.locator('.go-banner').count()) break;
+    if (await has('.go-banner')) break;
 
-    // Omrostning.
-    if (await page.locator('.vote-ja-btn').count()) {
-      await page.locator('.vote-ja-btn').click().catch(() => {});
-      lastAction = 'rost';
+    // Lagledarens kampanjformular.
+    if (await has('.camp-leader-form')) {
+      const nodes = page.locator('.map-node');
+      const count = await nodes.count();
+      for (const idx of [3, 10, 18]) {
+        if (idx < count) await nodes.nth(idx).click().catch(() => {});
+      }
+      await clickIf('.camp-issue');
+      const lock = page.getByRole('button', { name: 'Las kampanjveckan' });
+      if ((await lock.count()) && !(await lock.first().isDisabled())) {
+        await lock.first().click().catch(() => {});
+      }
     }
-    // Nominering / maktbefogenhet (valj forsta mojliga mal).
-    else if (await page.locator('.target-chip').count()) {
-      await page.locator('.target-chip').first().click().catch(() => {});
-      lastAction = 'mal';
-    }
-    // Lagstiftning (klicka forsta lagkortet).
-    else if (await page.locator('.law-clickable').count()) {
-      await page.locator('.law-clickable').first().click().catch(() => {});
-      lastAction = 'lag';
-    }
-    // Veto / granskning - knappar med text.
-    else if (await page.getByRole('button', { name: 'Klar' }).count()) {
-      await page.getByRole('button', { name: 'Klar' }).click().catch(() => {});
-      lastAction = 'klar';
-    } else if (await page.getByRole('button', { name: /Avvisa/ }).count()) {
-      await page.getByRole('button', { name: /Avvisa/ }).click().catch(() => {});
-      lastAction = 'veto';
-    }
-    await page.waitForTimeout(700);
+    // Mullvadens hemliga drag.
+    await clickIf('.camp-mole-box .btn-primary');
+    // Internt krismote.
+    await clickIf('.target-chip');
+
+    await page.waitForTimeout(650);
   }
 
-  if (!(await page.locator('.go-banner').count())) {
-    fail(`Spelet nadde aldrig slutskarmen (senaste handling: ${lastAction}).`);
-  }
-  const winner = await page.locator('.go-banner h1').textContent();
-  console.log(`  Slutskarm visas: "${winner?.trim()}"`);
+  if (!(await has('.go-banner'))) fail('Kampanjen nadde aldrig slutskarmen.');
+  const verdict = await page.locator('.go-banner h1').textContent();
+  console.log(`  Slutskarm: "${verdict?.trim()}"`);
 
-  // Facit ska finnas.
-  await page.getByRole('heading', { name: 'Riksdagens facit' }).waitFor();
-  await page.getByRole('heading', { name: 'Rollerna avslöjas' }).waitFor();
-  console.log('  Facit och rollavslojning renderade.');
+  await page.getByRole('heading', { name: 'Valresultat' }).waitFor();
+  await page.getByRole('heading', { name: 'Lagen och mullvadarna' }).waitFor();
+  console.log('  Valresultat och mullvadsavslojning renderade.');
 
   if (consoleErrors.length > 0) {
-    fail(`Konsolfel i webblasaren:\n${consoleErrors.join('\n')}`);
+    fail(`Konsolfel i webblasaren:\n${consoleErrors.slice(0, 5).join('\n')}`);
   }
 
   console.log('UI-ROKTEST OK');
@@ -122,5 +112,5 @@ try {
 } catch (err) {
   console.error(err);
   await browser.close();
-  fail(err.message);
+  fail(err.message ?? String(err));
 }

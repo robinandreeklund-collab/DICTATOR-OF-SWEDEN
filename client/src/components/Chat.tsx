@@ -2,8 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '@dos/shared';
 import { useStore } from '../store.js';
 
-export function Chat({ messages, meId }: { messages: ChatMessage[]; meId: string }) {
+export function Chat({
+  messages,
+  meId,
+  variant = 'global',
+  title,
+}: {
+  messages: ChatMessage[];
+  meId: string;
+  variant?: 'global' | 'team';
+  title?: string;
+}) {
   const sendChat = useStore((s) => s.sendChat);
+  const sendTeamChat = useStore((s) => s.sendTeamChat);
   const [text, setText] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -14,15 +25,16 @@ export function Chat({ messages, meId }: { messages: ChatMessage[]; meId: string
   const send = () => {
     const t = text.trim();
     if (!t) return;
-    sendChat(t);
+    if (variant === 'team') sendTeamChat(t);
+    else sendChat(t);
     setText('');
   };
 
   return (
-    <div className="chat">
-      <div className="chat-title">Diskussion</div>
+    <div className={`chat ${variant === 'team' ? 'chat-team' : ''}`}>
+      <div className="chat-title">{title ?? 'Diskussion'}</div>
       <div className="chat-log">
-        {messages.length === 0 && <p className="muted small">Inga meddelanden än.</p>}
+        {messages.length === 0 && <p className="muted small">Inga meddelanden an.</p>}
         {messages.map((m) => (
           <div
             key={m.id}
@@ -40,7 +52,7 @@ export function Chat({ messages, meId }: { messages: ChatMessage[]; meId: string
         <input
           value={text}
           maxLength={500}
-          placeholder="Skriv ett meddelande…"
+          placeholder={variant === 'team' ? 'Skriv till laget…' : 'Skriv ett meddelande…'}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}
         />

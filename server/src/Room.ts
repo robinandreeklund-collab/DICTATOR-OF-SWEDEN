@@ -49,7 +49,7 @@ const BOT_NAMES = [
   'Bot Per', 'Bot Sara', 'Bot Tomas', 'Bot Ulla', 'Bot Viktor',
 ];
 
-const DEFAULT_TEAM_PARTIES = ['s', 'm', 'sd', 'c'];
+const DEFAULT_TEAM_PARTIES = ['s', 'm', 'c', 'sd'];
 
 interface ServerPlayer {
   id: string;

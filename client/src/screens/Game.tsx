@@ -1,3 +1,4 @@
+import type { ClientGameView } from '@dos/shared';
 import { useStore } from '../store.js';
 import { PHASE_LABEL } from '../lib.js';
 import { Board } from '../components/Board.js';
@@ -11,7 +12,7 @@ import { Chat } from '../components/Chat.js';
 
 export function Game() {
   const snapshot = useStore((s) => s.snapshot)!;
-  const g = snapshot.game!;
+  const g = snapshot.game as ClientGameView;
   const meId = snapshot.you.id;
   const isHost = snapshot.you.isHost;
 

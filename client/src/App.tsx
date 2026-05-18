@@ -3,6 +3,7 @@ import { useStore } from './store.js';
 import { Landing } from './screens/Landing.js';
 import { Lobby } from './screens/Lobby.js';
 import { Game } from './screens/Game.js';
+import { CampaignGame } from './screens/CampaignGame.js';
 import { Toast } from './components/Toast.js';
 
 export function App() {
@@ -15,6 +16,8 @@ export function App() {
       : 'Dictator of Sweden';
   }, [snapshot]);
 
+  const inGame = snapshot?.phase === 'ingame';
+
   return (
     <div className="app">
       {!connected && (
@@ -22,7 +25,8 @@ export function App() {
       )}
       {!snapshot && <Landing />}
       {snapshot?.phase === 'lobby' && <Lobby />}
-      {snapshot?.phase === 'ingame' && <Game />}
+      {inGame && snapshot.mode === 'classic' && <Game />}
+      {inGame && snapshot.mode === 'campaign' && <CampaignGame />}
       <Toast />
     </div>
   );
