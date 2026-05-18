@@ -3,6 +3,9 @@
 
 import type { ClientGameView, GameSettings } from './types.js';
 import type { AnswerKey } from './valkompass.js';
+import type { CampaignClientView } from './campaign/types.js';
+
+export type GameMode = 'classic' | 'campaign';
 
 export interface ChatMessage {
   id: number;
@@ -12,6 +15,8 @@ export interface ChatMessage {
   ts: number;
   /** Systemmeddelanden (spelaren gick med osv.). */
   system: boolean;
+  /** Lagindex for lagchatt, annars null = global chatt. */
+  teamIndex: number | null;
 }
 
 export interface LobbyPlayer {
@@ -24,11 +29,20 @@ export interface LobbyPlayer {
   valkompassDone: boolean;
   suggestedPartyId: string | null;
   ready: boolean;
+  /** Vilket lag spelaren gatt med i (kampanjlaget). */
+  teamIndex: number | null;
+}
+
+export interface CampaignLobbyConfig {
+  numTeams: number;
+  teamParties: string[];
 }
 
 export interface LobbyView {
+  mode: GameMode;
   players: LobbyPlayer[];
   settings: GameSettings;
+  campaign: CampaignLobbyConfig;
   hostId: string;
   canStart: boolean;
   /** Anledning till att spelet inte kan startas, om nagon. */
@@ -39,11 +53,14 @@ export interface LobbyView {
 
 export interface RoomSnapshot {
   roomCode: string;
+  mode: GameMode;
   phase: 'lobby' | 'ingame';
   you: { id: string; name: string; isHost: boolean };
   lobby: LobbyView | null;
-  game: ClientGameView | null;
+  game: ClientGameView | CampaignClientView | null;
   chat: ChatMessage[];
+  /** Lagchatt for ditt lag (kampanjlaget), annars tom. */
+  teamChat: ChatMessage[];
 }
 
 export interface JoinResult {
@@ -53,7 +70,7 @@ export interface JoinResult {
   playerId?: string;
 }
 
-/** Spelhandling fran klient - serverns autentiserade playerId injiceras. */
+/** Spelhandling i klassiska laget. */
 export type ClientAction =
   | { type: 'NOMINATE'; talmanId: string }
   | { type: 'VOTE'; vote: boolean }
@@ -63,6 +80,17 @@ export type ClientAction =
   | { type: 'VETO_RESPONSE'; agree: boolean }
   | { type: 'POWER_TARGET'; targetId: string }
   | { type: 'POWER_PEEK_DONE' };
+
+/** Spelhandling i kampanjlaget. */
+export type CampaignClientAction =
+  | {
+      type: 'SUBMIT_PLAN';
+      spend: Record<string, number>;
+      leaderVisit: string | null;
+      issue: string;
+    }
+  | { type: 'SUBMIT_MOLE'; sabotage: boolean }
+  | { type: 'INTERNAL_VOTE'; accusedId: string };
 
 export interface ClientToServerEvents {
   'lobby:create': (p: { name: string }, cb: (r: JoinResult) => void) => void;
@@ -74,17 +102,23 @@ export interface ClientToServerEvents {
     p: { roomCode: string; playerId: string },
     cb: (r: JoinResult) => void,
   ) => void;
+  'lobby:setMode': (p: { mode: GameMode }) => void;
+  'lobby:setNumTeams': (p: { numTeams: number }) => void;
+  'lobby:setTeamParty': (p: { teamIndex: number; partyId: string }) => void;
+  'lobby:joinTeam': (p: { teamIndex: number }) => void;
   'lobby:valkompass': (p: { answers: Record<string, AnswerKey> }) => void;
   'lobby:setParty': (p: { partyId: string }) => void;
   'lobby:setReady': (p: { ready: boolean }) => void;
-  'lobby:addBot': () => void;
+  'lobby:addBot': (p: { teamIndex?: number }) => void;
   'lobby:removeBot': (p: { botId: string }) => void;
   'lobby:settings': (p: { settings: GameSettings }) => void;
   'lobby:start': () => void;
   'lobby:leave': () => void;
   'game:action': (p: { action: ClientAction }) => void;
+  'game:campaignAction': (p: { action: CampaignClientAction }) => void;
   'game:restart': () => void;
   'chat:send': (p: { text: string }) => void;
+  'chat:sendTeam': (p: { text: string }) => void;
 }
 
 export interface ServerToClientEvents {

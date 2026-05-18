@@ -93,6 +93,18 @@ io.on('connection', (socket) => {
     fn(room, data.playerId);
   };
 
+  socket.on('lobby:setMode', ({ mode }) => {
+    withRoom((room, pid) => room.setMode(pid, mode));
+  });
+  socket.on('lobby:setNumTeams', ({ numTeams }) => {
+    withRoom((room, pid) => room.setNumTeams(pid, numTeams));
+  });
+  socket.on('lobby:setTeamParty', ({ teamIndex, partyId }) => {
+    withRoom((room, pid) => room.setTeamParty(pid, teamIndex, partyId));
+  });
+  socket.on('lobby:joinTeam', ({ teamIndex }) => {
+    withRoom((room, pid) => room.joinTeam(pid, teamIndex));
+  });
   socket.on('lobby:valkompass', ({ answers }) => {
     withRoom((room, pid) => room.setValkompass(pid, answers));
   });
@@ -102,8 +114,8 @@ io.on('connection', (socket) => {
   socket.on('lobby:setReady', ({ ready }) => {
     withRoom((room, pid) => room.setReady(pid, ready));
   });
-  socket.on('lobby:addBot', () => {
-    withRoom((room) => room.addBot());
+  socket.on('lobby:addBot', (p) => {
+    withRoom((room) => room.addBot(p?.teamIndex));
   });
   socket.on('lobby:removeBot', ({ botId }) => {
     withRoom((room) => room.removeBot(botId));
@@ -120,8 +132,14 @@ io.on('connection', (socket) => {
   socket.on('game:action', ({ action }) => {
     withRoom((room, pid) => room.handleGameAction(pid, action));
   });
+  socket.on('game:campaignAction', ({ action }) => {
+    withRoom((room, pid) => room.handleCampaignAction(pid, action));
+  });
   socket.on('chat:send', ({ text }) => {
     withRoom((room, pid) => room.addChat(pid, text));
+  });
+  socket.on('chat:sendTeam', ({ text }) => {
+    withRoom((room, pid) => room.addTeamChat(pid, text));
   });
 
   socket.on('lobby:leave', () => {

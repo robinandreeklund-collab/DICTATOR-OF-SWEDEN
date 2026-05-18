@@ -10,11 +10,11 @@ export const TEAM_MIN_SIZE = 3;
 export const TEAM_MAX_SIZE = 5;
 
 /** Kampanjkassa ett lag far att fordela varje vecka. */
-export const WEEKLY_KASSA = 12;
+export const WEEKLY_KASSA = 18;
 /** Stodpoang ett partiledarbesok ger (innan multiplikatorer). */
-export const LEADER_VISIT_BONUS = 6;
+export const LEADER_VISIT_BONUS = 10;
 /** Andel av veckans kampanjeffekt som forsvinner vid sabotage. */
-export const SABOTAGE_FACTOR = 0.4;
+export const SABOTAGE_FACTOR = 0.5;
 /** Multiplikator nar laget driver veckans heta fraga. */
 export const HOT_ISSUE_BONUS = 1.35;
 
