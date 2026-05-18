@@ -68,30 +68,28 @@ try {
   if (!(await has('.poll-bars'))) fail('Opinionsstaplarna renderades inte.');
   console.log('  Karta, riksdagsgrafik och opinionsstaplar renderade.');
 
-  // Spela igenom kampanjen.
-  const deadline = Date.now() + 110_000;
+  // Spela igenom kampanjen - varje spelare har ett rolldrag.
+  const deadline = Date.now() + 130_000;
   while (Date.now() < deadline) {
     if (await has('.go-banner')) break;
 
-    // Lagledarens kampanjformular.
-    if (await has('.camp-leader-form')) {
-      const nodes = page.locator('.map-node');
-      const count = await nodes.count();
-      for (const idx of [3, 10, 18]) {
-        if (idx < count) await nodes.nth(idx).click().catch(() => {});
-      }
-      await clickIf('.camp-issue');
-      const lock = page.getByRole('button', { name: 'Las kampanjveckan' });
-      if ((await lock.count()) && !(await lock.first().isDisabled())) {
-        await lock.first().click().catch(() => {});
+    const submit = page.getByRole('button', { name: 'Las ditt drag' });
+    if (await submit.count()) {
+      if (await submit.first().isDisabled()) {
+        // Kampanjledare: valj valkretsar pa kartan forst.
+        const nodes = page.locator('.map-node');
+        const count = await nodes.count();
+        for (const idx of [3, 10, 18]) {
+          if (idx < count) await nodes.nth(idx).click().catch(() => {});
+        }
+      } else {
+        await submit.first().click().catch(() => {});
       }
     }
-    // Mullvadens hemliga drag.
-    await clickIf('.camp-mole-box .btn-primary');
     // Internt krismote.
     await clickIf('.target-chip');
 
-    await page.waitForTimeout(650);
+    await page.waitForTimeout(600);
   }
 
   if (!(await has('.go-banner'))) fail('Kampanjen nadde aldrig slutskarmen.');

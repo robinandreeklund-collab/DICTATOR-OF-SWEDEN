@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Campaign, getParty, type CampaignClientView } from '@dos/shared';
 import { useStore } from '../store.js';
-import { CAMPAIGN_PHASE_LABEL } from '../campaignLib.js';
+import { CAMPAIGN_PHASE_LABEL, ROLE_ICON, ROLE_LABEL } from '../campaignLib.js';
 import { SwedenMap } from '../components/campaign/SwedenMap.js';
 import { RiksdagArc } from '../components/campaign/RiksdagArc.js';
 import { PollBars } from '../components/campaign/PollBars.js';
-import { CampaignActionPanel, type Alloc } from '../components/campaign/CampaignActionPanel.js';
+import {
+  CampaignActionPanel,
+  emptyDraft,
+  type Draft,
+} from '../components/campaign/CampaignActionPanel.js';
 import { CampaignRoleReveal } from '../components/campaign/CampaignRoleReveal.js';
 import { WeeklyResult } from '../components/campaign/WeeklyResult.js';
 import { ElectionNight } from '../components/campaign/ElectionNight.js';
@@ -18,33 +22,27 @@ export function CampaignGame() {
   const meId = snapshot.you.id;
   const isHost = snapshot.you.isHost;
 
-  const [alloc, setAlloc] = useState<Alloc>({ focus: [], visit: null, issue: 'valfard' });
+  const [draft, setDraft] = useState<Draft>(() => emptyDraft(view));
   const [inspectId, setInspectId] = useState<string | null>(null);
 
-  // Nollstall kampanjval nar en ny vecka borjar.
   useEffect(() => {
-    setAlloc({ focus: [], visit: null, issue: view.hotIssue ?? 'valfard' });
-  }, [view.week, view.hotIssue]);
+    setDraft(emptyDraft(view));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view.week]);
 
   if (view.phase === 'roleReveal') return <CampaignRoleReveal view={view} />;
   if (view.phase === 'gameOver') return <CampaignGameOver view={view} isHost={isHost} />;
 
   const myTeam = view.teams.find((t) => t.id === view.you.teamId);
-  const allocActive =
-    view.phase === 'campaign' && view.you.isLeader && !view.you.teamPlan?.submitted;
+  const allocMode =
+    view.phase === 'planning' && view.you.role === 'kampanjledare' && !view.you.submitted;
 
   const onMapSelect = (id: string) => {
-    if (allocActive) {
-      setAlloc((a) => {
-        if (a.focus.includes(id)) {
-          return {
-            ...a,
-            focus: a.focus.filter((f) => f !== id),
-            visit: a.visit === id ? null : a.visit,
-          };
-        }
-        if (a.focus.length >= 5) return a;
-        return { ...a, focus: [...a.focus, id] };
+    if (allocMode) {
+      setDraft((d) => {
+        if (d.spend.includes(id)) return { ...d, spend: d.spend.filter((x) => x !== id) };
+        if (d.spend.length >= 6) return d;
+        return { ...d, spend: [...d.spend, id] };
       });
     }
     setInspectId(id);
@@ -69,20 +67,23 @@ export function CampaignGame() {
           </span>
         </div>
         {myTeam && (
-          <span
-            className="camp-team-pill"
-            style={{ borderColor: getParty(myTeam.partyId).color }}
-          >
-            Ditt lag: {getParty(myTeam.partyId).name}
-            {view.you.isLeader && ' · lagledare'}
+          <span className="camp-team-pill" style={{ borderColor: getParty(myTeam.partyId).color }}>
+            {getParty(myTeam.partyId).name}
+            {view.you.role && ` · ${ROLE_ICON[view.you.role]} ${ROLE_LABEL[view.you.role]}`}
             {view.you.isMole && ' · 🕵 mullvad'}
           </span>
         )}
       </header>
 
       {view.currentEvent && (
-        <div className={`news-banner ${view.phase === 'news' ? 'news-big' : ''}`}>
-          <span className="news-eyebrow">Nyhetscykeln · het fraga</span>
+        <div
+          className={`news-banner ${view.phase === 'news' ? 'news-big' : ''} ${
+            view.crisisTeamId ? 'news-crisis' : ''
+          }`}
+        >
+          <span className="news-eyebrow">
+            {view.crisisTeamId ? 'Kris i valrorelsen' : 'Nyhetscykeln · het fraga'}
+          </span>
           <strong>{view.currentEvent.title}</strong>
           <p>{view.currentEvent.body}</p>
           <span className="news-source">Kalla: {view.currentEvent.source}</span>
@@ -92,10 +93,8 @@ export function CampaignGame() {
       <div className="camp-body">
         <div className="camp-map-col">
           <SwedenMap view={view} selectedId={inspectId} onSelect={onMapSelect} />
-          {allocActive && (
-            <p className="camp-map-hint">
-              Klicka pa valkretsar for att satsa kampanjkassa (max 5).
-            </p>
+          {allocMode && (
+            <p className="camp-map-hint">Klicka pa valkretsar for att satsa kassa (max 6).</p>
           )}
           {inspectVk && inspectState && (
             <div className="vk-inspect">
@@ -112,10 +111,7 @@ export function CampaignGame() {
                     );
                     return (
                       <div key={party} className="vk-inspect-row">
-                        <span
-                          className="poll-tag"
-                          style={{ background: getParty(party).color }}
-                        >
+                        <span className="poll-tag" style={{ background: getParty(party).color }}>
                           {getParty(party).shortName}
                         </span>
                         <span>{((val / total) * 100).toFixed(1)}%</span>
@@ -134,10 +130,11 @@ export function CampaignGame() {
             tido={view.tidoMandate}
           />
           <PollBars projection={view.projection} />
-          <CampaignActionPanel view={view} alloc={alloc} onAlloc={setAlloc} />
+          <CampaignActionPanel view={view} draft={draft} onDraft={setDraft} />
         </div>
 
         <aside className="camp-side-col">
+          {myTeam && <TeamRoster view={view} />}
           {myTeam && (
             <Chat
               messages={snapshot.teamChat}
@@ -147,19 +144,59 @@ export function CampaignGame() {
             />
           )}
           <Chat messages={snapshot.chat} meId={meId} title="Allman debatt" />
-          <div className="game-log">
-            <div className="game-log-title">Kampanjlogg</div>
-            <div className="game-log-body">
-              {view.log.slice(-40).map((e) => (
-                <div key={e.id} className={`log-entry log-${e.kind}`}>
-                  <span className="log-round">V{e.week}</span>
-                  <span className="log-text">{e.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </aside>
       </div>
+    </div>
+  );
+}
+
+function TeamRoster({ view }: { view: CampaignClientView }) {
+  const team = view.teams.find((t) => t.id === view.you.teamId)!;
+  const planning = view.phase === 'planning';
+  return (
+    <div className="team-roster">
+      <div className="roster-head">
+        <strong>Ditt lag</strong>
+        {planning && (
+          <span className="roster-stats">
+            {team.submittedCount}/{team.memberIds.length} klara
+          </span>
+        )}
+      </div>
+      <div className="roster-stats-row">
+        <span title="Kampanjkassa">💰 {team.kassa}</span>
+        <span title="Momentum">⚡ {team.momentum >= 0 ? '+' : ''}{team.momentum}</span>
+        <span title="Lagmoral">🙂 {Math.round(team.morale * 100)}%</span>
+      </div>
+      <ul className="roster-list">
+        {team.memberIds.map((id) => {
+          const p = view.players.find((x) => x.id === id)!;
+          return (
+            <li key={id}>
+              <span className="roster-role">{ROLE_ICON[team.roles[id]]}</span>
+              <span className="roster-name">
+                {p.name}
+                {id === view.you.id && <em> (du)</em>}
+              </span>
+              <span className="roster-rolename">{ROLE_LABEL[team.roles[id]]}</span>
+              {planning && id === view.you.id && view.you.submitted && (
+                <span className="roster-done">✓</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {view.you.teamIntel.length > 0 && (
+        <div className="roster-intel">
+          <strong>Underrattelser</strong>
+          {view.you.teamIntel.slice(-4).map((e, i) => (
+            <p key={i} className="small">{e.text}</p>
+          ))}
+        </div>
+      )}
+      {team.moleStatus === 'exposed' && (
+        <p className="roster-mole">🕵 Mullvaden i laget ar avslojad.</p>
+      )}
     </div>
   );
 }

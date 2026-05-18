@@ -51,19 +51,18 @@ while (Date.now() < deadline) {
     await shot('5-valnatten');
     shotElection = true;
   }
-  if (await has('.camp-leader-form')) {
-    const nodes = page.locator('.map-node');
-    const count = await nodes.count();
-    for (const idx of [4, 12, 20]) {
-      if (idx < count) await nodes.nth(idx).click().catch(() => {});
+  const submit = page.getByRole('button', { name: 'Las ditt drag' });
+  if (await submit.count()) {
+    if (await submit.first().isDisabled()) {
+      const nodes = page.locator('.map-node');
+      const count = await nodes.count();
+      for (const idx of [4, 12, 20]) {
+        if (idx < count) await nodes.nth(idx).click().catch(() => {});
+      }
+    } else {
+      await submit.first().click().catch(() => {});
     }
-    if (await has('.camp-issue')) await page.locator('.camp-issue').first().click().catch(() => {});
-    const lock = page.getByRole('button', { name: 'Las kampanjveckan' });
-    if ((await lock.count()) && !(await lock.first().isDisabled()))
-      await lock.first().click().catch(() => {});
   }
-  if (await has('.camp-mole-box .btn-primary'))
-    await page.locator('.camp-mole-box .btn-primary').first().click().catch(() => {});
   if (await has('.target-chip'))
     await page.locator('.target-chip').first().click().catch(() => {});
   await page.waitForTimeout(600);

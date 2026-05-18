@@ -3,7 +3,7 @@
 
 import type { ClientGameView, GameSettings } from './types.js';
 import type { AnswerKey } from './valkompass.js';
-import type { CampaignClientView } from './campaign/types.js';
+import type { CampaignClientView, RoleAction } from './campaign/types.js';
 
 export type GameMode = 'classic' | 'campaign';
 
@@ -83,13 +83,7 @@ export type ClientAction =
 
 /** Spelhandling i kampanjlaget. */
 export type CampaignClientAction =
-  | {
-      type: 'SUBMIT_PLAN';
-      spend: Record<string, number>;
-      leaderVisit: string | null;
-      issue: string;
-    }
-  | { type: 'SUBMIT_MOLE'; sabotage: boolean }
+  | { type: 'SUBMIT_ROLE'; action: RoleAction; sabotage: boolean }
   | { type: 'INTERNAL_VOTE'; accusedId: string };
 
 export interface ClientToServerEvents {

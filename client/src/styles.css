@@ -760,3 +760,54 @@ input[type='text'], input:not([type]), .field input {
   .mode-picker { grid-template-columns: 1fr; }
   .en-title { font-size: 2.2rem; }
 }
+
+/* --- roller & lagroster (rollomgang) -------------------------------------- */
+.team-count { gap: 6px; }
+.team-count-num { font-size: 1.2rem; color: var(--gold); min-width: 24px; text-align: center; }
+
+.team-roster {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px; box-shadow: var(--shadow);
+}
+.roster-head { display: flex; justify-content: space-between; align-items: baseline; }
+.roster-stats { font-size: 0.8rem; color: var(--gold); }
+.roster-stats-row {
+  display: flex; gap: 12px; font-size: 0.85rem; color: var(--muted);
+  margin: 6px 0 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.roster-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.roster-list li { display: flex; align-items: center; gap: 7px; font-size: 0.88rem; }
+.roster-role { font-size: 1rem; }
+.roster-name { font-weight: 600; }
+.roster-name em { color: var(--gold); font-style: normal; font-size: 0.78rem; }
+.roster-rolename { flex: 1; color: var(--muted); font-size: 0.78rem; }
+.roster-done { color: var(--dem); font-weight: 700; }
+.roster-intel {
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border);
+}
+.roster-intel strong { color: var(--gold); font-size: 0.82rem; }
+.roster-intel p { margin: 4px 0 0; color: #cdd6e6; }
+.roster-mole { margin: 8px 0 0; color: #e88; font-size: 0.82rem; }
+
+/* --- kris i handlingspanelen --------------------------------------------- */
+.camp-crisis-box {
+  margin-top: 12px; padding: 12px; border-radius: 10px;
+  background: linear-gradient(160deg, #5d2622, #2a1a28); border: 1px solid var(--aut);
+}
+.camp-crisis-box strong { color: #f0a; color: #f4a98c; }
+.news-crisis { border-left-color: var(--aut); }
+.news-crisis .news-eyebrow { color: #f4a98c; }
+
+/* --- veckans ticker ------------------------------------------------------- */
+.wr-ticker { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 5px; }
+.wr-ticker li {
+  font-size: 0.88rem; padding: 6px 10px; background: var(--bg3);
+  border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0;
+  animation: tickerIn 0.4s ease both;
+}
+@keyframes tickerIn { from { opacity: 0; transform: translateX(-12px); } }
+
+.reveal-mole-warning {
+  background: rgba(179, 67, 58, 0.25); border: 1px solid var(--aut);
+  border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; margin: 8px 0;
+}

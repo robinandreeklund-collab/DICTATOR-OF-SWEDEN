@@ -149,17 +149,26 @@ function CampaignSetup({
       <div className="section-head">
         <h2>Partilag</h2>
         {isHost && (
-          <div className="row">
+          <div className="row team-count">
             <span className="muted small">Antal lag:</span>
-            {[3, 4].map((n) => (
-              <button
-                key={n}
-                className={`btn btn-small ${cfg.numTeams === n ? 'camp-issue-on' : ''}`}
-                onClick={() => store.setNumTeams(n)}
-              >
-                {n}
-              </button>
-            ))}
+            <button
+              className="btn btn-small"
+              disabled={cfg.numTeams <= 3}
+              onClick={() => store.setNumTeams(cfg.numTeams - 1)}
+            >
+              −
+            </button>
+            <strong className="team-count-num">{cfg.numTeams}</strong>
+            <button
+              className="btn btn-small"
+              disabled={cfg.numTeams >= 12}
+              onClick={() => store.setNumTeams(cfg.numTeams + 1)}
+            >
+              +
+            </button>
+            <span className="muted small">
+              {cfg.numTeams <= 4 ? 'Snabbval' : cfg.numTeams <= 7 ? 'Riksval' : 'Mega-val'}
+            </span>
           </div>
         )}
       </div>

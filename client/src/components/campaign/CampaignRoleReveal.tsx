@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getParty, type CampaignClientView } from '@dos/shared';
-import { playerName } from '../../campaignLib.js';
+import { ROLE_DESC, ROLE_ICON, ROLE_LABEL, playerName } from '../../campaignLib.js';
 
 export function CampaignRoleReveal({ view }: { view: CampaignClientView }) {
   const [open, setOpen] = useState(false);
@@ -10,9 +10,10 @@ export function CampaignRoleReveal({ view }: { view: CampaignClientView }) {
   }, []);
 
   const team = view.teams.find((t) => t.id === view.you.teamId);
-  if (!team) return null;
+  if (!team || !view.you.role) return null;
   const party = getParty(team.partyId);
   const isMole = view.you.isMole;
+  const role = view.you.role;
   const mates = team.memberIds.filter((id) => id !== view.you.id);
 
   return (
@@ -33,21 +34,32 @@ export function CampaignRoleReveal({ view }: { view: CampaignClientView }) {
             <span className="reveal-team" style={{ color: party.color }}>
               {party.name}
             </span>
-            <h1 className="reveal-role">{isMole ? 'Mullvad' : 'Trogen kampanjarbetare'}</h1>
-            <p className="reveal-blurb">
-              {isMole
-                ? 'Du ar i hemlighet kopt av motstandarna. Sabotera ditt lags kampanj sa att partiet hamnar i opposition - utan att bli avslojad.'
-                : 'Du kampar for att ditt parti ska sitta i regering efter valet. Men nagon i laget ar en mullvad. Hitta den.'}
-            </p>
+            <h1 className="reveal-role">
+              {ROLE_ICON[role]} {ROLE_LABEL[role]}
+            </h1>
+            <p className="reveal-blurb">{ROLE_DESC[role]}</p>
+            {isMole && (
+              <p className="reveal-mole-warning">
+                🕵 Du ar dessutom lagets hemliga <strong>mullvad</strong>. Du vinner
+                om partiet hamnar i opposition — sabotera utan att avslojas.
+              </p>
+            )}
+            {!isMole && (
+              <p className="reveal-blurb small">
+                Nagon i laget ar en mullvad som vill se er forlora. Hall ogonen
+                oppna.
+              </p>
+            )}
             <div className="reveal-allies">
               <span>Ditt lag:</span>
               <ul>
                 {mates.map((id) => (
-                  <li key={id}>{playerName(view, id)}</li>
+                  <li key={id}>
+                    {playerName(view, id)} — {ROLE_LABEL[team.roles[id]]}
+                  </li>
                 ))}
               </ul>
             </div>
-            <p className="muted small">Kampanjen borjar strax…</p>
           </div>
         )}
       </div>

@@ -55,18 +55,31 @@ function decideClassic(me: string, g: ClientGameView): { type: string; [k: strin
 // --- kampanjlaget -----------------------------------------------------------
 
 function decideCampaign(me: string, g: CampaignClientView): CampaignClientAction | void {
-  if (g.phase === 'campaign') {
+  if (g.phase === 'planning' && !g.you.submitted && g.you.role) {
     const myTeam = g.teams.find((t) => t.id === g.you.teamId);
-    if (g.you.isLeader && !g.you.teamPlan?.submitted) {
+    const rivals = g.teams.filter((t) => t.id !== g.you.teamId);
+    const role = g.you.role;
+    let action: Record<string, unknown> = { role };
+    if (role === 'kampanjledare') {
       const vks = g.valkretsar.slice(0, 3).map((v) => v.id);
       const spend: Record<string, number> = {};
       vks.forEach((id) => (spend[id] = 4));
-      return { type: 'SUBMIT_PLAN', spend, leaderVisit: vks[0], issue: g.hotIssue ?? 'brott' };
+      action = { role, spend };
+    } else if (role === 'talesperson') {
+      action = {
+        role,
+        issue: g.hotIssue ?? 'valfard',
+        debateTarget: rivals[0]?.id ?? 'positiv',
+      };
+      if (g.crisisTeamId === g.you.teamId) action.crisisResponse = 'erkann';
+    } else if (role === 'strateg') {
+      action = { role, focus: 'bas' };
+    } else if (role === 'analytiker') {
+      action = { role, analyzeTarget: rivals[0]?.id ?? g.you.teamId };
+    } else {
+      action = { role, choice: 'fundraise' };
     }
-    if (g.you.isMole && myTeam?.moleStatus === 'hidden' && !g.you.moleMove?.submitted) {
-      return { type: 'SUBMIT_MOLE', sabotage: Math.random() < 0.4 };
-    }
-    return;
+    return { type: 'SUBMIT_ROLE', action: action as never, sabotage: false };
   }
   if (g.phase === 'internal' && g.you.internalVoteCast === null) {
     const myTeam = g.teams.find((t) => t.id === g.you.teamId);

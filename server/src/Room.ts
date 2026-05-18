@@ -49,7 +49,10 @@ const BOT_NAMES = [
   'Bot Per', 'Bot Sara', 'Bot Tomas', 'Bot Ulla', 'Bot Viktor',
 ];
 
-const DEFAULT_TEAM_PARTIES = ['s', 'm', 'c', 'sd'];
+// Blockväxlande ordning sa att valfritt antal lag blir nara balanserat.
+const DEFAULT_TEAM_PARTIES = [
+  's', 'm', 'c', 'sd', 'v', 'kd', 'mp', 'l', 'fi', 'pirat', 'djur', 'nyans',
+];
 
 interface ServerPlayer {
   id: string;
@@ -183,7 +186,7 @@ export class Room {
 
   setNumTeams(playerId: string, n: number): void {
     if (playerId !== this.hostId || this.inGame || this.mode !== 'campaign') return;
-    if (n !== 3 && n !== 4) return;
+    if (n < Campaign.MIN_TEAMS || n > Campaign.MAX_TEAMS) return;
     this.numTeams = n;
     this.teamParties = DEFAULT_TEAM_PARTIES.slice(0, n);
     for (const p of this.players) {
