@@ -733,6 +733,9 @@ export function toClientView(state: GameState, viewerId: string): ClientGameView
     pendingPower: state.pendingPower,
     winner: state.winner,
     winReason: state.winReason,
+    finalRoles: gameOver
+      ? Object.fromEntries(state.players.map((p) => [p.id, p.role]))
+      : null,
     log: state.log,
     you: {
       id: viewerId,

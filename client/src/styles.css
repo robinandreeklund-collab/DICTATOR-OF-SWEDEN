@@ -1,0 +1,476 @@
+/* Dictator of Sweden — parlamentarisk thriller-estetik. */
+
+:root {
+  --bg: #0e1726;
+  --bg2: #18233a;
+  --bg3: #1f2d48;
+  --border: #2c3c5c;
+  --text: #e8edf5;
+  --muted: #93a0b8;
+  --gold: #d8b15a;
+  --primary: #3a6fd6;
+  --primary-dark: #2b54a8;
+  --dem: #4a9d6b;
+  --aut: #b3433a;
+  --ja: #4a9d6b;
+  --nej: #c0504a;
+  --radius: 12px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #1c2c4a 0%, transparent 70%),
+    var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  margin: 0 0 0.4em;
+}
+
+.app { min-height: 100%; }
+
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* --- knappar -------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover:not(:disabled) { background: #25365a; transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary {
+  background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+  border-color: var(--primary);
+  font-weight: 600;
+}
+.btn-primary:hover:not(:disabled) { background: var(--primary); }
+.btn-ghost { background: transparent; }
+.btn-small { padding: 6px 12px; font-size: 0.85rem; }
+.btn-big { padding: 14px 22px; font-size: 1.05rem; width: 100%; }
+.icon-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg3); color: var(--muted);
+  cursor: pointer; font-size: 1rem; line-height: 1;
+}
+.icon-btn:hover { color: var(--nej); border-color: var(--nej); }
+
+/* --- kort ----------------------------------------------------------------- */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.section-head {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px; margin-bottom: 8px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field span { font-size: 0.85rem; color: var(--muted); }
+input[type='text'], input:not([type]), .field input {
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+.code-input { letter-spacing: 0.3em; text-transform: uppercase; font-weight: 700; }
+
+/* --- anslutnings-/toast --------------------------------------------------- */
+.conn-banner {
+  background: var(--aut); color: #fff;
+  text-align: center; padding: 7px; font-size: 0.85rem;
+}
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  padding: 12px 20px; border-radius: 10px; box-shadow: var(--shadow);
+  cursor: pointer; z-index: 100; max-width: 90%;
+  animation: toastIn 0.2s ease;
+}
+.toast-error { background: var(--nej); color: #fff; }
+.toast-notice { background: var(--gold); color: #1a1a1a; }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } }
+
+/* --- landning ------------------------------------------------------------- */
+.landing {
+  max-width: 480px; margin: 0 auto; padding: 8vh 20px 40px;
+  text-align: center;
+}
+.landing-hero { margin-bottom: 28px; }
+.crest { font-size: 3.4rem; color: var(--gold); }
+.landing h1 { font-size: 2.5rem; letter-spacing: 0.5px; }
+.tagline { color: var(--muted); }
+.landing-card { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.landing-card .btn { width: 100%; }
+.landing-foot { margin-top: 26px; font-size: 0.8rem; color: var(--muted); }
+
+/* --- lobby ---------------------------------------------------------------- */
+.lobby { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.lobby-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.lobby-head h1 { font-size: 1.8rem; margin-bottom: 4px; }
+.code-chip, .code-chip-static {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 999px; padding: 5px 14px; color: var(--text);
+  font-size: 0.9rem; cursor: pointer;
+}
+.code-chip strong { color: var(--gold); letter-spacing: 0.15em; }
+.code-chip-static { cursor: default; }
+
+.lobby-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+.lobby-side { position: sticky; top: 16px; align-self: start; }
+
+.party-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px; margin-top: 12px;
+}
+.party-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  padding: 12px; border-radius: 10px; cursor: pointer;
+  background: var(--bg3); border: 2px solid var(--border); color: var(--text);
+  text-align: left; transition: transform 0.08s ease;
+}
+.party-card:hover { transform: translateY(-2px); }
+.party-selected { background: #25365a; }
+.party-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; height: 38px; border-radius: 8px; padding: 0 8px;
+  font-weight: 700; color: #fff; font-size: 0.95rem;
+}
+.party-name { font-size: 0.85rem; }
+.party-suggested { font-size: 0.72rem; color: var(--gold); font-weight: 600; }
+
+.player-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.player-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 12px;
+}
+.player-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; border-radius: 7px; padding: 0 6px;
+  font-weight: 700; color: #fff; font-size: 0.85rem;
+}
+.player-name { flex: 1; }
+.player-name em { color: var(--gold); font-style: normal; font-size: 0.8rem; }
+.player-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tag {
+  font-size: 0.7rem; padding: 2px 8px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+}
+.tag-host { color: var(--gold); border-color: var(--gold); }
+.tag-bot { color: #7fa8d8; }
+.tag-ready { color: var(--dem); border-color: var(--dem); }
+.tag-off { color: var(--nej); border-color: var(--nej); }
+
+.ready-toggle {
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+  margin-bottom: 12px;
+}
+.ready-toggle input { width: 18px; height: 18px; accent-color: var(--primary); }
+.host-controls { display: flex; flex-direction: column; gap: 10px; }
+.rules-toggle {
+  background: none; border: none; color: var(--gold); cursor: pointer;
+  font-size: 1rem; font-family: Georgia, serif; padding: 0;
+}
+.rules-text { margin-top: 10px; font-size: 0.9rem; color: var(--muted); }
+.rules-text strong { color: var(--text); }
+
+/* --- valkompass ----------------------------------------------------------- */
+.valkompass { border-color: var(--gold); }
+.vk-head { display: flex; justify-content: space-between; align-items: baseline; }
+.vk-progress {
+  height: 7px; background: var(--bg); border-radius: 999px;
+  overflow: hidden; margin: 10px 0 18px;
+}
+.vk-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--primary), var(--gold));
+  transition: width 0.3s ease;
+}
+.vk-topic { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.vk-statement { font-size: 1.3rem; font-family: Georgia, serif; margin: 4px 0 18px; }
+.vk-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.vk-opt { justify-content: flex-start; }
+.vk-opt-on { border-color: var(--gold); background: #25365a; }
+.vk-results { list-style: none; padding: 0; margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+.vk-results li { display: flex; align-items: center; gap: 10px; }
+.vk-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.vk-pname { width: 150px; font-size: 0.9rem; }
+.vk-bar { flex: 1; height: 10px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+.vk-bar-fill { display: block; height: 100%; }
+.vk-pct { width: 44px; text-align: right; color: var(--muted); font-size: 0.85rem; }
+
+/* --- chatt ---------------------------------------------------------------- */
+.chat {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); display: flex; flex-direction: column;
+  overflow: hidden; margin-bottom: 16px;
+}
+.chat-title, .game-log-title {
+  padding: 10px 14px; font-family: Georgia, serif; font-weight: 600;
+  border-bottom: 1px solid var(--border); background: var(--bg3);
+}
+.chat-log { padding: 10px 14px; height: 260px; overflow-y: auto; font-size: 0.88rem; }
+.chat-msg { margin-bottom: 5px; word-break: break-word; }
+.chat-name { color: var(--gold); font-weight: 600; }
+.chat-system { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+.chat-mine .chat-name { color: var(--primary); }
+.chat-input { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--border); }
+.chat-input input { flex: 1; }
+
+/* --- spelvy --------------------------------------------------------------- */
+.game { max-width: 1240px; margin: 0 auto; padding: 16px 20px 40px; }
+.game-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.game-head-main { display: flex; align-items: baseline; gap: 14px; }
+.game-head h1 { font-size: 1.6rem; margin: 0; }
+.phase-pill {
+  background: var(--bg3); border: 1px solid var(--gold); color: var(--gold);
+  border-radius: 999px; padding: 4px 14px; font-size: 0.85rem;
+}
+.game-body { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
+.game-right { align-self: start; position: sticky; top: 14px; }
+
+/* --- spelbordet ----------------------------------------------------------- */
+.board {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.track { margin-bottom: 14px; }
+.track-label { font-size: 0.9rem; margin-bottom: 6px; display: flex; gap: 8px; align-items: baseline; }
+.track-democratic .track-label { color: var(--dem); }
+.track-authoritarian .track-label { color: var(--aut); }
+.track-count { color: var(--muted); font-size: 0.8rem; }
+.track-slots { display: flex; gap: 8px; }
+.slot {
+  flex: 1; min-height: 64px; border-radius: 8px;
+  border: 1px dashed var(--border); background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; text-align: center;
+}
+.track-democratic .slot-filled {
+  background: linear-gradient(160deg, #2f6e49, #244f37);
+  border: 1px solid var(--dem);
+}
+.track-authoritarian .slot-filled {
+  background: linear-gradient(160deg, #8a342d, #5f241f);
+  border: 1px solid var(--aut);
+}
+.slot-filled { animation: slotPop 0.35s ease; }
+@keyframes slotPop { from { transform: scale(0.6); opacity: 0; } }
+.slot-card { font-size: 0.74rem; font-weight: 600; }
+.slot-power { font-size: 1.4rem; opacity: 0.65; }
+.slot-empty { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+.board-meta { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+.tracker-label { font-size: 0.8rem; color: var(--muted); display: block; }
+.tracker-dots { display: flex; gap: 6px; margin: 4px 0; }
+.tracker-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); }
+.tracker-on { background: var(--gold); border-color: var(--gold); }
+.deck-info { display: flex; gap: 16px; font-size: 0.82rem; color: var(--muted); align-items: flex-end; }
+
+/* --- spelarrutnat --------------------------------------------------------- */
+.player-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px; margin-bottom: 16px;
+}
+.seat {
+  background: var(--bg2); border: 2px solid var(--border);
+  border-radius: 10px; padding: 10px; text-align: left;
+  display: flex; flex-direction: column; gap: 3px; position: relative;
+  color: var(--text); cursor: default;
+}
+.seat-president { box-shadow: 0 0 0 2px var(--gold) inset; }
+.seat-talman { box-shadow: 0 0 0 2px var(--primary) inset; }
+.seat-dead { opacity: 0.45; filter: grayscale(0.7); }
+.seat-selectable { cursor: pointer; }
+.seat-selectable:hover { transform: translateY(-2px); border-color: var(--gold); }
+.seat-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 32px; height: 30px; border-radius: 6px; padding: 0 6px;
+  font-weight: 700; color: #fff; font-size: 0.82rem; align-self: flex-start;
+}
+.seat-name { font-weight: 600; font-size: 0.95rem; }
+.seat-name em { color: var(--gold); font-style: normal; font-size: 0.78rem; }
+.seat-party { font-size: 0.74rem; color: var(--muted); }
+.seat-roles { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.pill { font-size: 0.66rem; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); }
+.pill-pres { color: var(--gold); border-color: var(--gold); }
+.pill-talman { color: #7fa8d8; border-color: var(--primary); }
+.pill-off { color: var(--nej); border-color: var(--nej); }
+.pill-dead { color: var(--nej); border-color: var(--nej); }
+.seat-intel { font-size: 0.72rem; color: var(--gold); margin-top: 2px; }
+.seat-vote {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+}
+.vote-ja { background: var(--ja); color: #fff; }
+.vote-nej { background: var(--nej); color: #fff; }
+.vote-cast { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+/* --- handlingspanel ------------------------------------------------------- */
+.action-panel {
+  background: var(--bg2); border: 1px solid var(--gold);
+  border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow);
+}
+.action-panel h3 { color: var(--gold); }
+.action-wait {
+  border-color: var(--border); color: var(--muted);
+  display: flex; align-items: center; gap: 10px;
+}
+.action-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border); border-top-color: var(--gold);
+  animation: spin 0.9s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.vote-buttons { display: flex; gap: 12px; margin-top: 10px; }
+.vote-ja-btn, .vote-nej-btn { flex: 1; font-size: 1.3rem; font-weight: 700; padding: 16px; }
+.vote-ja-btn { background: var(--ja); border-color: var(--ja); color: #fff; }
+.vote-nej-btn { background: var(--nej); border-color: var(--nej); color: #fff; }
+.target-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.target-chip { background: var(--bg3); }
+.target-chip:hover { border-color: var(--gold); }
+.card-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+
+/* --- lagkort -------------------------------------------------------------- */
+.law-card {
+  flex: 1; min-width: 180px; max-width: 240px;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px; border-radius: 10px; text-align: left;
+  border: 2px solid var(--border); color: var(--text);
+  background: var(--bg3);
+}
+.law-democratic { border-color: var(--dem); background: linear-gradient(165deg, #234d37, #1a3a2a); }
+.law-authoritarian { border-color: var(--aut); background: linear-gradient(165deg, #5d2622, #3f1b18); }
+.law-clickable { cursor: pointer; transition: transform 0.1s ease; }
+.law-clickable:hover { transform: translateY(-4px); }
+.law-type { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; }
+.law-title { font-family: Georgia, serif; font-size: 1.05rem; font-weight: 600; }
+.law-topic { font-size: 0.74rem; color: var(--gold); }
+.law-desc { font-size: 0.82rem; color: #d5dcea; }
+
+/* --- rollkort ------------------------------------------------------------- */
+.role-card {
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+.role-democrats { background: linear-gradient(160deg, #234d37, #15243a); border-color: var(--dem); }
+.role-antidemocrats { background: linear-gradient(160deg, #5d2622, #15243a); border-color: var(--aut); }
+.role-card-head { display: flex; justify-content: space-between; align-items: baseline; }
+.role-card-team { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.role-card-role { font-family: Georgia, serif; font-size: 1.3rem; font-weight: 700; }
+.role-card-blurb { font-size: 0.85rem; margin: 6px 0; }
+.role-allies { font-size: 0.85rem; }
+.role-allies-label { color: var(--gold); }
+.role-allies ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* --- riksdagsprotokoll ---------------------------------------------------- */
+.game-log {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.game-log-body { padding: 8px 12px; max-height: 280px; overflow-y: auto; font-size: 0.82rem; }
+.log-entry { display: flex; gap: 6px; padding: 3px 0; align-items: baseline; }
+.log-round { color: var(--muted); font-size: 0.7rem; min-width: 22px; }
+.log-icon { flex-shrink: 0; }
+.log-win .log-text { color: var(--gold); font-weight: 600; }
+.log-legislation .log-text { color: #d5dcea; }
+.log-power .log-text { color: var(--gold); }
+
+/* --- rollutdelning -------------------------------------------------------- */
+.reveal-overlay {
+  position: fixed; inset: 0; background: rgba(8, 12, 22, 0.96);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  z-index: 50;
+}
+.reveal-card {
+  background: var(--bg2); border: 2px solid var(--border);
+  border-radius: 16px; padding: 36px; max-width: 460px; width: 100%;
+  text-align: center; box-shadow: var(--shadow);
+  transition: transform 0.5s ease, border-color 0.5s ease;
+}
+.reveal-open.reveal-democrats { border-color: var(--dem); }
+.reveal-open.reveal-antidemocrats { border-color: var(--aut); }
+.reveal-open { animation: revealFlip 0.6s ease; }
+@keyframes revealFlip {
+  0% { transform: rotateY(90deg) scale(0.9); }
+  100% { transform: rotateY(0) scale(1); }
+}
+.reveal-seal { font-size: 3rem; color: var(--gold); }
+.reveal-team { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); }
+.reveal-role { font-size: 2.6rem; margin: 6px 0; }
+.reveal-democrats .reveal-role { color: var(--dem); }
+.reveal-antidemocrats .reveal-role { color: var(--aut); }
+.reveal-blurb { color: #d5dcea; }
+.reveal-allies { margin-top: 14px; font-size: 0.9rem; }
+.reveal-allies ul { list-style: none; padding: 0; margin: 6px 0; }
+.reveal-allies li { color: var(--gold); }
+
+/* --- slutskarm ------------------------------------------------------------ */
+.game-over { max-width: 1000px; margin: 0 auto; padding: 30px 20px 50px; }
+.go-banner {
+  border-radius: var(--radius); padding: 30px; text-align: center;
+  margin-bottom: 20px; box-shadow: var(--shadow);
+}
+.go-democrats { background: linear-gradient(160deg, #2f6e49, #1a3a2a); border: 2px solid var(--dem); }
+.go-antidemocrats { background: linear-gradient(160deg, #8a342d, #4f201c); border: 2px solid var(--aut); }
+.go-sub { text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+.go-banner h1 { font-size: 2.6rem; margin: 6px 0; }
+.go-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.reveal-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.reveal-list li { display: flex; align-items: center; gap: 10px; }
+.reveal-list-name { font-weight: 600; }
+.role-tag-democrat { color: var(--dem); border-color: var(--dem); }
+.role-tag-collaborator { color: #e0913f; border-color: #e0913f; }
+.role-tag-dictator { color: var(--nej); border-color: var(--nej); }
+.facit-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.facit-item { border-radius: 10px; padding: 12px; border-left: 4px solid var(--border); background: var(--bg3); }
+.facit-democratic { border-left-color: var(--dem); }
+.facit-authoritarian { border-left-color: var(--aut); }
+.facit-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.facit-topic { font-size: 0.74rem; color: var(--gold); }
+.facit-fact { font-size: 0.85rem; margin: 6px 0 2px; }
+.facit-source { font-size: 0.75rem; color: var(--muted); margin: 0; }
+.go-actions { justify-content: center; margin-top: 20px; }
+
+/* --- responsivt ----------------------------------------------------------- */
+@media (max-width: 900px) {
+  .lobby-grid, .game-body, .go-grid { grid-template-columns: 1fr; }
+  .game-right, .lobby-side { position: static; }
+  .reveal-role { font-size: 2rem; }
+  .go-banner h1 { font-size: 2rem; }
+}

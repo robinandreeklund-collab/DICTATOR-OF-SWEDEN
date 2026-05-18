@@ -170,6 +170,8 @@ export interface ClientGameView {
 
   winner: Team | null;
   winReason: string | null;
+  /** Alla spelares roller — satt endast nar spelet ar slut. */
+  finalRoles: Record<string, Role> | null;
   log: LogEntry[];
 
   /** Mottagarspecifik privat information. */
