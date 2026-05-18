@@ -72,9 +72,11 @@ describe('kortlek', () => {
 });
 
 describe('partier', () => {
-  it('innehaller alla atta riksdagspartier', () => {
-    expect(PARTIES).toHaveLength(8);
-    expect(new Set(PARTIES.map((p) => p.id)).size).toBe(8);
+  it('innehaller de atta riksdagspartierna', () => {
+    for (const id of ['s', 'm', 'sd', 'v', 'mp', 'c', 'kd', 'l']) {
+      expect(PARTIES.some((p) => p.id === id)).toBe(true);
+    }
+    expect(new Set(PARTIES.map((p) => p.id)).size).toBe(PARTIES.length);
   });
 });
 

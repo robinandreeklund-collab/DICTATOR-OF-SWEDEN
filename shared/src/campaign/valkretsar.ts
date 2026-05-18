@@ -60,8 +60,10 @@ export const VALKRETS_BY_ID: Record<string, Valkrets> = Object.fromEntries(
 export const TOTAL_MANDATE = VALKRETSAR.reduce((s, v) => s + v.mandate, 0);
 
 // Nationellt utgangsstod 2026 (ungefarligt opinionslage, normaliseras i bruk).
+// De fyra smapartierna ligger lagt och kommer sallan over 4-procentssparren.
 export const NATIONAL_BASE: Record<string, number> = {
   s: 25, sd: 21, m: 19, v: 9, kd: 6, c: 6, mp: 5, l: 4,
+  fi: 2, djur: 1, pirat: 2, nyans: 1,
 };
 
 // Regional lutning: multiplikator pa nationellt stod per regiontyp.

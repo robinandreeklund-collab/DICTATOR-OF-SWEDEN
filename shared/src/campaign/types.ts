@@ -1,15 +1,34 @@
-// Typer for spellaget "Valrorelsen 2026" - kampanjduellen lag mot lag.
+// Typer for spellaget "Valrorelsen 2026".
+// Varje spelare har en roll med ett eget veckobeslut - ingen ar passiv.
+
+import type { RegionType } from './valkretsar.js';
 
 export type CampaignPhase =
   | 'roleReveal'
   | 'news'
-  | 'campaign'
+  | 'planning'
   | 'resolution'
   | 'internal'
   | 'electionNight'
   | 'gameOver';
 
 export type MoleStatus = 'hidden' | 'exposed';
+
+/** De fem rollerna i ett partilag. Var och en har ett eget veckodrag. */
+export type CampaignRole =
+  | 'kampanjledare'
+  | 'talesperson'
+  | 'strateg'
+  | 'analytiker'
+  | 'insamlare';
+
+export const ROLE_PRIORITY: CampaignRole[] = [
+  'kampanjledare',
+  'talesperson',
+  'strateg',
+  'analytiker',
+  'insamlare',
+];
 
 export interface CampaignPlayer {
   id: string;
@@ -18,56 +37,93 @@ export interface CampaignPlayer {
   isHost: boolean;
   connected: boolean;
   teamId: string;
-  /** Sant for lagledaren som last lagets kampanjdrag. */
-  isLeader: boolean;
+  role: CampaignRole;
+}
+
+export interface IntelEntry {
+  week: number;
+  text: string;
 }
 
 export interface CampaignTeam {
   id: string;
   partyId: string;
-  leaderId: string;
   memberIds: string[];
+  /** Spelaren med rollen kampanjledare. */
+  leaderId: string;
   /** Hemlig - filtreras bort i klientvyn for utomstaende. */
   moleId: string;
   moleStatus: MoleStatus;
-  /** Lagmoral 0.6-1.2, paverkar kampanjeffekt. */
+  /** Lagmoral 0.6-1.3. */
   morale: number;
+  /** Kampanjkassa kvar att spendera. */
+  kassa: number;
+  /** Momentum -3..+3, paverkar veckans genomslag. */
+  momentum: number;
+  /** Underrattelser laget samlat (syns bara for laget). */
+  intel: IntelEntry[];
 }
 
 export interface ValkretsState {
   id: string;
-  /** Valjarstod per parti (rapoang, ratio avgor mandat). */
   support: Record<string, number>;
 }
 
-/** Ett lags kampanjbeslut for en vecka. */
-export interface WeeklyPlan {
-  teamId: string;
-  /** Kampanjkassa fordelad per valkrets-id. */
-  spend: Record<string, number>;
-  /** Valkrets dar partiledaren gor besok. */
-  leaderVisit: string | null;
-  /** Sakfraga laget driver denna vecka. */
-  issue: string;
+// --- Rollhandlingar ---------------------------------------------------------
+
+export type StrategFocus = 'bas' | 'marginal' | 'attack';
+export type InsamlareChoice = 'fundraise' | 'annons' | 'skold';
+export type CrisisResponse = 'erkann' | 'forneka' | 'skyll';
+
+export type RoleAction =
+  | { role: 'kampanjledare'; spend: Record<string, number> }
+  | {
+      role: 'talesperson';
+      issue: string;
+      debateTarget: string;
+      crisisResponse?: CrisisResponse;
+    }
+  | { role: 'strateg'; focus: StrategFocus; attackTarget?: string }
+  | { role: 'analytiker'; analyzeTarget: string }
+  | { role: 'insamlare'; choice: InsamlareChoice; region?: RegionType };
+
+export interface RoleSubmission {
+  playerId: string;
   submitted: boolean;
+  action: RoleAction;
+  /** Mullvadens hemliga sabotage av sitt eget drag. */
+  sabotage: boolean;
 }
 
-/** Mullvadens hemliga veckobeslut. */
-export interface MoleMove {
-  teamId: string;
-  sabotage: boolean;
-  submitted: boolean;
+// --- handelser & resultat ---------------------------------------------------
+
+export interface CampaignEventCard {
+  id: string;
+  title: string;
+  body: string;
+  hotIssue: string;
+  /** Sant = handelsen ar en kris som drabbar ett lag. */
+  crisis: boolean;
+  regionShift?: { region: RegionType; party: string; amount: number };
+  source: string;
+}
+
+export interface DebateResult {
+  teamA: string;
+  teamB: string;
+  winnerTeamId: string;
+  issue: string;
 }
 
 export interface WeeklyOutcome {
   week: number;
-  /** Stodforandring per parti nationellt denna vecka. */
-  swing: Record<string, number>;
-  /** Debattens parter och vinnare. */
-  debate: { teamA: string; teamB: string; winnerTeamId: string; issue: string } | null;
-  /** Lag vars mullvad saboterade (avslojas ej vem). */
-  sabotagedTeamIds: string[];
   headline: string;
+  swing: Record<string, number>;
+  debates: DebateResult[];
+  /** Lag vars vecka saboterades (vem avslojas ej). */
+  sabotagedTeamIds: string[];
+  /** Korta nyhetsrader att rulla i en ticker. */
+  ticker: string[];
 }
 
 export interface PartyResult {
@@ -82,27 +138,14 @@ export interface ElectionResult {
   redgronMandate: number;
   tidoMandate: number;
   governingBloc: 'redgron' | 'tido';
-  /** Lag-id -> vann laget (partiet i regering). */
   teamWon: Record<string, boolean>;
-  /** Lag-id -> vann lagets mullvad. */
   moleWon: Record<string, boolean>;
-}
-
-export interface CampaignEventCard {
-  id: string;
-  title: string;
-  body: string;
-  /** Sakfraga som blir "het" denna vecka. */
-  hotIssue: string;
-  /** Valfri regioneffekt: stodjuste per parti i en regiontyp. */
-  regionShift?: { region: string; party: string; amount: number };
-  source: string;
 }
 
 export interface CampaignLogEntry {
   id: number;
   week: number;
-  kind: 'system' | 'news' | 'campaign' | 'debate' | 'mole' | 'result';
+  kind: 'system' | 'news' | 'campaign' | 'debate' | 'mole' | 'result' | 'crisis';
   text: string;
 }
 
@@ -119,13 +162,14 @@ export interface CampaignState {
 
   currentEvent: CampaignEventCard | null;
   hotIssue: string | null;
+  /** Lag som drabbas av veckans kris, om nagon. */
+  crisisTeamId: string | null;
 
-  plans: Record<string, WeeklyPlan>;
-  moleMoves: Record<string, MoleMove>;
+  /** Spelar-id -> veckans rollhandling. */
+  submissions: Record<string, RoleSubmission>;
 
   lastOutcome: WeeklyOutcome | null;
 
-  /** internal-fasen: lag-id -> (rostare-id -> anklagad-id). */
   internalVotes: Record<string, Record<string, string>>;
   internalDone: boolean;
 
@@ -135,19 +179,20 @@ export interface CampaignState {
   nextLogId: number;
 }
 
-// --- Klientvy (hemligheter filtrerade) --------------------------------------
+// --- klientvy ---------------------------------------------------------------
 
 export interface CampaignTeamView {
   id: string;
   partyId: string;
   leaderId: string;
   memberIds: string[];
+  roles: Record<string, CampaignRole>;
   moleStatus: MoleStatus;
-  morale: number;
-  /** Mullvadens id - endast nar avslojad eller spelet ar slut. */
   moleId: string | null;
-  planSubmitted: boolean;
-  moleSubmitted: boolean;
+  morale: number;
+  momentum: number;
+  kassa: number;
+  submittedCount: number;
 }
 
 export interface ValkretsView {
@@ -176,16 +221,18 @@ export interface CampaignClientView {
   tidoMandate: number;
   currentEvent: CampaignEventCard | null;
   hotIssue: string | null;
+  crisisTeamId: string | null;
   lastOutcome: WeeklyOutcome | null;
   result: ElectionResult | null;
   log: CampaignLogEntry[];
   you: {
     id: string;
     teamId: string;
+    role: CampaignRole | null;
     isMole: boolean;
-    isLeader: boolean;
-    teamPlan: WeeklyPlan | null;
-    moleMove: MoleMove | null;
+    submitted: boolean;
+    mySubmission: RoleSubmission | null;
+    teamIntel: IntelEntry[];
     internalVoteCast: string | null;
   };
   finalMoles: Record<string, string> | null;
