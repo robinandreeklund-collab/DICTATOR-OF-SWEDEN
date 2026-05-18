@@ -22,8 +22,8 @@ export interface Valkrets {
 }
 
 export const VALKRETSAR: Valkrets[] = [
-  { id: 'norrbotten', name: 'Norrbottens lan', shortName: 'Norrbotten', mandate: 9, region: 'norr', x: 300, y: 95 },
-  { id: 'vasterbotten', name: 'Vasterbottens lan', shortName: 'Vasterbotten', mandate: 10, region: 'norr', x: 255, y: 195 },
+  { id: 'norrbotten', name: 'Norrbottens lan', shortName: 'Norrbotten', mandate: 9, region: 'norr', x: 258, y: 110 },
+  { id: 'vasterbotten', name: 'Vasterbottens lan', shortName: 'Vasterbotten', mandate: 10, region: 'norr', x: 240, y: 205 },
   { id: 'jamtland', name: 'Jamtlands lan', shortName: 'Jamtland', mandate: 5, region: 'norr', x: 175, y: 250 },
   { id: 'vasternorrland', name: 'Vasternorrlands lan', shortName: 'Vasternorrland', mandate: 9, region: 'norr', x: 260, y: 290 },
   { id: 'gavleborg', name: 'Gavleborgs lan', shortName: 'Gavleborg', mandate: 11, region: 'norr', x: 265, y: 365 },

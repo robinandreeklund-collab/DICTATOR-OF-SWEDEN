@@ -811,3 +811,36 @@ input[type='text'], input:not([type]), .field input {
   background: rgba(179, 67, 58, 0.25); border: 1px solid var(--aut);
   border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; margin: 8px 0;
 }
+
+/* --- grafikputs: kartnoder, rorelse --------------------------------------- */
+.map-node-halo { opacity: 0.2; transition: fill 0.6s ease; }
+.map-node-core { transition: r 0.5s ease, fill 0.6s ease; }
+.map-node:hover .map-node-halo { opacity: 0.45; }
+.map-node-sel .map-node-halo { animation: haloPulse 1.7s ease-in-out infinite; }
+@keyframes haloPulse {
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(12px); }
+}
+.riksdag-arc, .poll-bars, .action-panel, .sweden-map,
+.team-roster, .news-banner, .card {
+  animation: riseIn 0.4s ease both;
+}
+
+.arc-bloc strong { display: inline-block; min-width: 2.2ch; text-align: right; }
+
+/* Mjuk puls pa aktiva element. */
+.btn-primary:not(:disabled) { position: relative; }
+.phase-pill {
+  background: linear-gradient(110deg, var(--bg3), #2a3c5e);
+}
+
+/* Landningens emblem far ett lugnt sken. */
+.crest { animation: crestGlow 4s ease-in-out infinite; }
+@keyframes crestGlow {
+  0%, 100% { text-shadow: 0 0 18px rgba(216, 177, 90, 0.3); }
+  50% { text-shadow: 0 0 34px rgba(216, 177, 90, 0.6); }
+}

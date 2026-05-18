@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { getParty, type NationalProjection } from '@dos/shared';
+import { useCountUp } from '../../hooks.js';
 
 // Mandatfordelningen som en parlamentarisk halvcirkel (349 platser).
 
@@ -58,6 +59,8 @@ export function RiksdagArc({
   while (seatColors.length < seats.length) seatColors.push('#2c3c5c');
 
   const leadBloc = redgron >= tido ? 'redgron' : 'tido';
+  const redgronShown = useCountUp(redgron);
+  const tidoShown = useCountUp(tido);
 
   return (
     <div className="riksdag-arc">
@@ -79,10 +82,10 @@ export function RiksdagArc({
       </svg>
       <div className="arc-blocs">
         <span className={`arc-bloc bloc-redgron ${leadBloc === 'redgron' ? 'bloc-lead' : ''}`}>
-          Rodgrona <strong>{redgron}</strong>
+          Rodgrona <strong>{redgronShown}</strong>
         </span>
         <span className={`arc-bloc bloc-tido ${leadBloc === 'tido' ? 'bloc-lead' : ''}`}>
-          Tido <strong>{tido}</strong>
+          Tido <strong>{tidoShown}</strong>
         </span>
       </div>
     </div>
