@@ -33,7 +33,7 @@ function pick<T>(arr: T[], rng: Rng): T {
  */
 export function botAction(state: GameState, botId: string, rng: Rng): Action | null {
   const bot = playerById(state, botId);
-  if (!bot || !bot.alive || !bot.isBot) return null;
+  if (!bot || !bot.alive) return null;
   const allies = knownAllyIds(state, bot);
   const isAnti = teamOf(bot.role) === 'antidemocrats';
 
