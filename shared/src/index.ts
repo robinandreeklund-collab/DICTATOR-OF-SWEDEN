@@ -6,3 +6,4 @@ export * from './valkompass.js';
 export * from './engine.js';
 export * from './bots.js';
 export * from './protocol.js';
+export * as Campaign from './campaign/index.js';
