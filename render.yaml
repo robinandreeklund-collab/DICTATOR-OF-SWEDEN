@@ -1,0 +1,16 @@
+# Render-blueprint for Dictator of Sweden.
+# Render laser den har filen automatiskt och bygger + startar hela spelet.
+# Klienten byggs in i server/public och serveras av samma webbtjanst.
+services:
+  - type: web
+    name: dictator-of-sweden
+    runtime: node
+    plan: free
+    branch: claude/dictator-sweden-game-JItkf
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start --workspace=server
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
