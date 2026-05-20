@@ -844,3 +844,185 @@ input[type='text'], input:not([type]), .field input {
   0%, 100% { text-shadow: 0 0 18px rgba(216, 177, 90, 0.3); }
   50% { text-shadow: 0 0 34px rgba(216, 177, 90, 0.6); }
 }
+
+/* ===========================================================================
+   Valfeber 2026 - nationella, persistenta spelet
+   =========================================================================== */
+.valfeber { min-height: 100%; }
+.v-loading { text-align: center; padding: 25vh 20px; color: var(--muted); }
+
+/* --- auth ---------------------------------------------------------------- */
+.v-auth { max-width: 460px; margin: 0 auto; padding: 7vh 20px 40px; text-align: center; }
+.v-auth-hero { margin-bottom: 24px; }
+.v-flag { font-size: 3.6rem; animation: crestGlow 4s ease-in-out infinite; }
+.v-auth h1 { font-size: 2.6rem; }
+.v-auth-card { text-align: left; }
+.v-auth-tabs, .v-lb-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.v-tab {
+  flex: 1; padding: 9px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--bg3); color: var(--muted); cursor: pointer; font-size: 0.88rem;
+}
+.v-tab-on { background: #25365a; color: var(--text); border-color: var(--gold); }
+
+/* --- onboarding ---------------------------------------------------------- */
+.v-onboard { max-width: 780px; margin: 0 auto; padding: 5vh 20px 50px; }
+.v-onboard h1 { font-size: 2rem; }
+.v-party-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px; margin: 18px 0;
+}
+.v-party-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 16px; border-radius: 12px; cursor: pointer;
+  background: var(--bg2); border: 2px solid var(--border); color: var(--text);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+.v-party-card:hover { transform: translateY(-3px); }
+.v-party-on { box-shadow: 0 0 22px rgba(216,177,90,0.25); background: #25365a; }
+.v-party-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px; border-radius: 10px; padding: 0 8px;
+  color: #fff; font-weight: 700; font-size: 1.05rem;
+}
+.v-party-name { font-weight: 600; font-size: 0.92rem; }
+.v-party-leader { font-size: 0.76rem; color: var(--muted); }
+.v-region-field { max-width: 360px; }
+.v-region-field select, .team-party-select {
+  padding: 11px 12px; border-radius: 10px; background: var(--bg);
+  color: var(--text); border: 1px solid var(--border); font-size: 1rem; width: 100%;
+}
+
+/* --- dashboard ----------------------------------------------------------- */
+.v-dash { max-width: 1240px; margin: 0 auto; padding: 14px 18px 50px; }
+.v-top {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+}
+.v-top h1 { font-size: 1.5rem; margin: 0; }
+.v-day { font-size: 0.82rem; color: var(--gold); }
+.v-top-right { display: flex; align-items: center; gap: 10px; }
+.v-myparty {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px;
+  border: 1.5px solid var(--border); border-radius: 999px; background: var(--bg2);
+  font-size: 0.85rem;
+}
+
+.v-event {
+  background: linear-gradient(120deg, #2a3c5e, #1b2740);
+  border: 1px solid var(--border); border-left: 4px solid var(--gold);
+  border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+  animation: riseIn 0.4s ease both;
+}
+.v-event-crisis { border-left-color: var(--aut); box-shadow: 0 0 30px rgba(179,67,58,0.18); }
+.v-event-eyebrow { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
+.v-event-crisis .v-event-eyebrow { color: #f4a98c; }
+.v-event strong { display: block; font-family: Georgia, serif; font-size: 1.3rem; margin: 4px 0; }
+.v-event p { margin: 4px 0; color: #d5dcea; }
+
+.v-grid { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+.v-main { display: flex; flex-direction: column; gap: 16px; }
+.v-side { display: flex; flex-direction: column; gap: 16px; }
+
+.v-opinion-head { display: flex; justify-content: space-between; align-items: baseline; }
+.v-myresult { font-size: 0.95rem; }
+
+.v-actions-left { color: var(--gold); font-weight: 700; }
+.v-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 10px; }
+.v-action-card {
+  display: flex; flex-direction: column; gap: 4px; text-align: left;
+  padding: 14px; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(160deg, #243a5e, #1a2840);
+  border: 1px solid var(--border); color: var(--text);
+  transition: transform 0.1s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.v-action-card:hover:not(:disabled) {
+  transform: translateY(-4px); border-color: var(--gold);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.4);
+}
+.v-action-card:disabled { opacity: 0.4; cursor: not-allowed; }
+.v-action-icon { font-size: 1.8rem; }
+.v-action-label { font-weight: 700; font-size: 0.95rem; }
+.v-action-desc { font-size: 0.76rem; color: var(--muted); }
+
+.v-stats { display: flex; justify-content: space-around; text-align: center; }
+.v-stat { display: flex; flex-direction: column; }
+.v-stat-num { font-size: 1.7rem; font-weight: 800; color: var(--gold); font-family: Georgia, serif; }
+.v-stat-lbl { font-size: 0.74rem; color: var(--muted); }
+
+.v-lb { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.v-lb li { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 7px; font-size: 0.86rem; }
+.v-lb-me { background: #25365a; }
+.v-lb-rank { width: 22px; color: var(--muted); text-align: right; font-weight: 700; }
+.v-lb-mark { min-width: 26px; height: 22px; font-size: 0.72rem; border-radius: 5px; }
+.v-lb-name { flex: 1; }
+.v-lb-pts { color: var(--gold); font-weight: 700; }
+
+.v-ach-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.v-ach { font-size: 0.78rem; padding: 4px 10px; border-radius: 999px; background: var(--bg3); border: 1px solid var(--gold); color: var(--gold); }
+
+/* --- åtgärdsmodal -------------------------------------------------------- */
+.v-modal-overlay {
+  position: fixed; inset: 0; background: rgba(8,12,22,0.85); z-index: 60;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  animation: toastIn 0.2s ease;
+}
+.v-modal {
+  background: var(--bg2); border: 2px solid var(--gold); border-radius: 16px;
+  padding: 22px; max-width: 520px; width: 100%; max-height: 88vh; overflow-y: auto;
+  box-shadow: var(--shadow); animation: modalPop 0.25s ease;
+}
+@keyframes modalPop { from { transform: scale(0.92); opacity: 0; } }
+.v-modal h2 { color: var(--gold); }
+.v-q { margin: 12px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.v-q-topic { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
+.v-q-statement { font-family: Georgia, serif; font-size: 1.05rem; margin: 4px 0 8px; }
+.v-q-opts, .v-slogans, .v-ally-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.v-slogans, .v-ally-grid { flex-direction: column; margin: 10px 0; }
+.v-ally-grid .btn, .v-slogans .btn { justify-content: flex-start; gap: 8px; }
+.v-opt-on { border-color: var(--gold) !important; background: #25365a !important; }
+.v-modal .btn-big { margin-top: 14px; }
+
+/* --- resultat-pop & konfetti --------------------------------------------- */
+.v-result-overlay {
+  position: fixed; inset: 0; z-index: 80; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.v-result {
+  pointer-events: auto; background: var(--bg2); border: 2px solid var(--gold);
+  border-radius: 16px; padding: 22px 32px; text-align: center; box-shadow: var(--shadow);
+  animation: resultPop 0.35s cubic-bezier(0.2,1.4,0.5,1) both;
+}
+.v-result-viral { border-color: var(--dem); box-shadow: 0 0 40px rgba(74,157,107,0.4); }
+@keyframes resultPop { from { transform: scale(0.5); opacity: 0; } }
+.v-result-points { font-size: 2.6rem; font-weight: 800; color: var(--gold); font-family: Georgia, serif; }
+.v-result-text { color: #d5dcea; max-width: 340px; }
+.v-result-ach { margin-top: 8px; color: var(--gold); font-weight: 700; }
+
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.confetti span {
+  position: absolute; top: -14px; width: 9px; height: 14px; border-radius: 2px;
+  animation-name: confettiFall; animation-timing-function: linear; animation-fill-mode: forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(108vh) rotate(620deg); opacity: 0.85; }
+}
+
+/* --- karta --------------------------------------------------------------- */
+.v-map-svg { width: 100%; max-height: 46vh; display: block; }
+.v-map-home { animation: haloPulse 1.6s ease-in-out infinite; }
+.v-map-cap { text-align: center; margin: 6px 0 0; }
+
+/* --- valnatten ----------------------------------------------------------- */
+.v-election { max-width: 920px; margin: 0 auto; padding: 30px 18px 50px; }
+.v-el-banner { border-radius: 14px; padding: 28px; text-align: center; margin-bottom: 18px; box-shadow: var(--shadow); animation: riseIn 0.5s ease both; }
+.v-el-redgron { background: linear-gradient(160deg, #2f6e49, #1a3a2a); border: 2px solid var(--dem); }
+.v-el-tido { background: linear-gradient(160deg, #1b49a2, #15243a); border: 2px solid #3a6fd6; }
+.v-el-banner h1 { font-size: 2.4rem; margin: 6px 0; }
+.v-el-you { text-align: center; }
+.v-el-win { border-color: var(--dem); }
+.v-el-loss { border-color: var(--aut); }
+
+@media (max-width: 1000px) {
+  .v-grid { grid-template-columns: 1fr; }
+}

@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:ui": "node test/ui-smoke.mjs",
+    "valfeber-ui": "node test/valfeber-ui.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

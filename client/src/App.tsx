@@ -1,33 +1,9 @@
 import { useEffect } from 'react';
-import { useStore } from './store.js';
-import { Landing } from './screens/Landing.js';
-import { Lobby } from './screens/Lobby.js';
-import { Game } from './screens/Game.js';
-import { CampaignGame } from './screens/CampaignGame.js';
-import { Toast } from './components/Toast.js';
+import { ValfeberApp } from './valfeber/ValfeberApp.js';
 
 export function App() {
-  const snapshot = useStore((s) => s.snapshot);
-  const connected = useStore((s) => s.connected);
-
   useEffect(() => {
-    document.title = snapshot
-      ? `Dictator of Sweden — ${snapshot.roomCode}`
-      : 'Dictator of Sweden';
-  }, [snapshot]);
-
-  const inGame = snapshot?.phase === 'ingame';
-
-  return (
-    <div className="app">
-      {!connected && (
-        <div className="conn-banner">Ingen kontakt med servern — ateransluter…</div>
-      )}
-      {!snapshot && <Landing />}
-      {snapshot?.phase === 'lobby' && <Lobby />}
-      {inGame && snapshot.mode === 'classic' && <Game />}
-      {inGame && snapshot.mode === 'campaign' && <CampaignGame />}
-      <Toast />
-    </div>
-  );
+    document.title = 'Valfeber 2026';
+  }, []);
+  return <ValfeberApp />;
 }

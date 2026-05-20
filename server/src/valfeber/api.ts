@@ -39,6 +39,14 @@ async function buildState(db: Db, player: Player) {
   const standings = computeStandings(support);
   const counts = await partyMemberCounts(db);
 
+  const mapLeaders: Record<string, string> = {};
+  for (const vk of Campaign.VALKRETSAR) {
+    const row = support[vk.id] ?? {};
+    let best = VALFEBER_PARTIES[0];
+    for (const p of VALFEBER_PARTIES) if ((row[p] ?? 0) > (row[best] ?? 0)) best = p;
+    mapLeaders[vk.id] = best;
+  }
+
   // Spelarens region-stod for sitt parti.
   let regionStandings = null;
   if (player.region_id) {
@@ -84,6 +92,7 @@ async function buildState(db: Db, player: Player) {
     },
     event: eventForDay(day),
     standings,
+    mapLeaders,
     partyCounts: counts,
     regionStandings,
     you: {
