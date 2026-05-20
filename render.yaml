@@ -14,3 +14,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+      # Klistra in din Neon-anslutningsstrang har i Render (markeras hemlig).
+      # Utan den kor servern en lokal inbaddad databas som nollstalls vid omstart.
+      - key: DATABASE_URL
+        sync: false

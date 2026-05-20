@@ -7,6 +7,9 @@ import { Server } from 'socket.io';
 import type { ClientToServerEvents, ServerToClientEvents } from '@dos/shared';
 import { RoomManager } from './RoomManager.js';
 import type { Room } from './Room.js';
+import { getDb } from './valfeber/db.js';
+import { initSchema } from './valfeber/schema.js';
+import { createValfeberApi } from './valfeber/api.js';
 
 const PORT = Number(process.env.PORT) || 3001;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,10 +23,14 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 });
 
 const manager = new RoomManager(io);
+const db = getDb();
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, rooms: manager.roomCount });
 });
+
+// Valfeber 2026 REST-API (bestaende, databasdrivet) - fore catch-all.
+app.use('/api', createValfeberApi(db));
 
 // Servera den byggda klienten om den finns.
 if (existsSync(PUBLIC_DIR)) {
@@ -163,6 +170,13 @@ io.on('connection', (socket) => {
   });
 });
 
-httpServer.listen(PORT, () => {
-  console.log(`[Dictator of Sweden] Servern lyssnar pa port ${PORT}`);
-});
+initSchema(db)
+  .then(() => {
+    httpServer.listen(PORT, () => {
+      console.log(`[Dictator of Sweden] Servern lyssnar pa port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('[valfeber] Kunde inte initiera databasen:', err);
+    process.exit(1);
+  });
