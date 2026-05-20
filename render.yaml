@@ -14,7 +14,10 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+      # Hindrar Playwright fran att ladda ner webblasare under bygget (sparar minne/tid).
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
       # Klistra in din Neon-anslutningsstrang har i Render (markeras hemlig).
-      # Utan den kor servern en lokal inbaddad databas som nollstalls vid omstart.
+      # Kravs i produktion - utan den startar inte spelet.
       - key: DATABASE_URL
         sync: false
