@@ -43,6 +43,7 @@ export interface ValfeberState {
     achievements: string[];
   };
   leaderboards: { global: LeaderRow[]; party: LeaderRow[]; region: LeaderRow[] };
+  alliances: { party_a: string; party_b: string }[];
   debate: { id: string; topic: string; statement: string }[];
   election: { redgron: number; tido: number; governingBloc: 'redgron' | 'tido' } | null;
 }
@@ -87,6 +88,24 @@ export const api = {
     req<{ result: ActionResultPayload; state: ValfeberState }>(
       '/action',
       { method: 'POST', body: JSON.stringify({ kind, ...payload }) },
+      token,
+    ),
+  teams: (token: string) =>
+    req<{ teams: { id: number; name: string; party_id: string; members: number }[]; myTeamId: number | null }>(
+      '/teams',
+      { method: 'GET' },
+      token,
+    ),
+  createTeam: (token: string, name: string) =>
+    req<{ ok: boolean; teamId: number }>(
+      '/team',
+      { method: 'POST', body: JSON.stringify({ name }) },
+      token,
+    ),
+  joinTeam: (token: string, teamId: number) =>
+    req<{ ok: boolean }>(
+      '/team/join',
+      { method: 'POST', body: JSON.stringify({ teamId }) },
       token,
     ),
   chatGet: (token: string, scope: string, scopeId: string) =>

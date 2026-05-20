@@ -7,6 +7,7 @@ import { register, login, playerByToken } from '../src/valfeber/auth.js';
 import { performAction, setPartyAndRegion } from '../src/valfeber/actions.js';
 import { computeStandings, isElectionOver } from '../src/valfeber/world.js';
 import { getLeaderboard, playerRank, getAchievements } from '../src/valfeber/leaderboard.js';
+import { ensureSimulated } from '../src/valfeber/simulation.js';
 
 async function main() {
   process.env.VALFEBER_START_TS = String(Date.now());
@@ -74,13 +75,62 @@ async function main() {
   console.log('  Mandatprojektion summerar till 349 OK.');
 
   // Topplista
-  const lb = await getLeaderboard(db, 'global', null, 10);
-  assert(lb.length === 1 && lb[0].username === 'Robin', 'topplistan saknar spelaren');
+  const lb = await getLeaderboard(db, 'global', null, 50);
+  assert(lb.some((r) => r.username === 'Robin'), 'topplistan saknar spelaren');
   const rank = await playerRank(db, player.points);
   assert(rank === 1, 'spelaren borde vara rank 1');
   const ach = await getAchievements(db, player.id);
   assert(ach.includes('first_action'), 'borde ha first_action-achievement');
   console.log('  Topplista, rank och achievements OK.');
+
+  // Simulerad befolkning
+  const aiCount = await db.query<{ n: number }>(
+    'SELECT COUNT(*)::int AS n FROM players WHERE is_ai = true',
+  );
+  assert(Number(aiCount[0].n) > 0, 'AI-spelare borde ha skapats');
+  const aiBefore = await db.query<{ p: number }>(
+    'SELECT COALESCE(SUM(points),0)::int AS p FROM players WHERE is_ai = true',
+  );
+  await ensureSimulated(db, world);
+  const aiAfter = await db.query<{ p: number }>(
+    'SELECT COALESCE(SUM(points),0)::int AS p FROM players WHERE is_ai = true',
+  );
+  assert(Number(aiAfter[0].p) > Number(aiBefore[0].p), 'AI borde tjana poang vid simulering');
+  const mid = Number(aiAfter[0].p);
+  await ensureSimulated(db, world); // samma dag igen
+  const aiAgain = await db.query<{ p: number }>(
+    'SELECT COALESCE(SUM(points),0)::int AS p FROM players WHERE is_ai = true',
+  );
+  assert(Number(aiAgain[0].p) === mid, 'simulering borde vara idempotent per dag');
+  console.log('  Simulerad befolkning: AI ror opinion och topplista, idempotent OK.');
+
+  // Lag
+  const team = await db.query<{ id: number }>(
+    'INSERT INTO teams (party_id, name, created_by, created_ts) VALUES ($1, $2, $3, $4) RETURNING id',
+    ['s', 'Sosse-ganget', player.id, Date.now()],
+  );
+  await db.query('INSERT INTO team_members (team_id, player_id) VALUES ($1, $2)', [
+    team[0].id,
+    player.id,
+  ]);
+  const members = await db.query<{ n: number }>(
+    'SELECT COUNT(*)::int AS n FROM team_members WHERE team_id = $1',
+    [team[0].id],
+  );
+  assert(Number(members[0].n) === 1, 'laget borde ha en medlem');
+  console.log('  Lag: skapande och medlemskap OK.');
+
+  // Chatt
+  await db.query(
+    'INSERT INTO chat (scope, scope_id, player_id, name, body, ts) VALUES ($1, $2, $3, $4, $5, $6)',
+    ['party', 's', player.id, 'Robin', 'Hej laget!', Date.now()],
+  );
+  const msgs = await db.query<{ body: string }>(
+    'SELECT body FROM chat WHERE scope = $1 AND scope_id = $2',
+    ['party', 's'],
+  );
+  assert(msgs.length === 1 && msgs[0].body === 'Hej laget!', 'chatten sparades inte');
+  console.log('  Chatt: meddelande sparas och hamtas OK.');
 
   // Valnatt
   const pastWorld = { start_ts: Date.now() - 20 * 86_400_000, end_ts: Date.now() - 1000 };

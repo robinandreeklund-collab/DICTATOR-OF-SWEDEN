@@ -1026,3 +1026,15 @@ input[type='text'], input:not([type]), .field input {
 @media (max-width: 1000px) {
   .v-grid { grid-template-columns: 1fr; }
 }
+
+/* --- Valfeber: lag, chatt, allianser ------------------------------------- */
+.v-social .v-lb-tabs { margin: 10px 0 8px; }
+.v-team-create { margin: 8px 0; }
+.v-team-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.v-chat-log { height: 180px; }
+.v-alliances { display: flex; flex-wrap: wrap; gap: 8px; }
+.v-alliance {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 10px; font-size: 0.8rem;
+}

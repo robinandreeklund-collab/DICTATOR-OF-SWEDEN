@@ -50,6 +50,21 @@ try {
   if (!lbText?.includes(uname)) fail('Spelaren syns inte pa topplistan.');
   console.log('  Topplistan visar spelaren.');
 
+  // Lag & chatt
+  const teamInput = page.getByPlaceholder('Skapa lag…');
+  if (await teamInput.count()) {
+    await teamInput.fill('Testlaget');
+    await page.getByRole('button', { name: 'Skapa', exact: true }).click();
+    await page.waitForTimeout(700);
+  }
+  const chatInput = page.getByPlaceholder('Skriv…');
+  await chatInput.fill('Hej kampanjen');
+  await page.getByRole('button', { name: 'Skicka' }).click();
+  await page.waitForTimeout(900);
+  const chatText = await page.locator('.v-chat-log').textContent();
+  if (!chatText?.includes('Hej kampanjen')) fail('Chattmeddelandet syns inte.');
+  console.log('  Lag skapat och chatt fungerar.');
+
   if (errors.length) fail('Konsolfel:\n' + errors.slice(0, 5).join('\n'));
   console.log('VALFEBER UI-TEST OK');
   await browser.close();

@@ -3,6 +3,7 @@ import { Campaign } from '@dos/shared';
 import type { Db } from './db.js';
 import { loadWorld, loadSupport } from './schema.js';
 import { login, playerByToken, register, type Player } from './auth.js';
+import { ensureSimulated } from './simulation.js';
 import { performAction, questionsForDay, setPartyAndRegion, type ActionKind } from './actions.js';
 import {
   getAchievements,
@@ -32,6 +33,7 @@ function h(fn: (req: Request, res: Response) => Promise<void>) {
 
 async function buildState(db: Db, player: Player) {
   const world = await loadWorld(db);
+  await ensureSimulated(db, world);
   const day = currentDay(world);
   const total = totalDays(world);
   const electionOver = isElectionOver(world);
@@ -60,6 +62,9 @@ async function buildState(db: Db, player: Player) {
 
   const rank = await playerRank(db, player.points);
   const achievements = await getAchievements(db, player.id);
+  const alliances = await db.query<{ party_a: string; party_b: string }>(
+    'SELECT party_a, party_b FROM alliances ORDER BY id DESC LIMIT 12',
+  );
 
   const [global, partyLb, regionLb] = await Promise.all([
     getLeaderboard(db, 'global', null, 50),
@@ -107,6 +112,7 @@ async function buildState(db: Db, player: Player) {
       achievements,
     },
     leaderboards: { global, party: partyLb, region: regionLb },
+    alliances,
     debate: questionsForDay(day).map((q) => ({
       id: q.id,
       topic: q.topic,
@@ -172,6 +178,7 @@ export function createValfeberApi(db: Db): Router {
     const player = await auth(req, res);
     if (!player) return;
     const world = await loadWorld(db);
+    await ensureSimulated(db, world);
     const { kind, ...payload } = req.body ?? {};
     const r = await performAction(db, world, player, kind as ActionKind, payload);
     if (!r.ok) {

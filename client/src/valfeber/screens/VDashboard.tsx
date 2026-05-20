@@ -4,6 +4,7 @@ import { useV } from '../store.js';
 import { useCountUp } from '../../hooks.js';
 import { RiksdagArc } from '../../components/campaign/RiksdagArc.js';
 import { VMap } from '../components/VMap.js';
+import { VSocial } from '../components/VSocial.js';
 import type { ValfeberState } from '../api.js';
 
 const RIKSDAG = ['s', 'm', 'sd', 'v', 'c', 'kd', 'mp', 'l'];
@@ -169,6 +170,27 @@ export function VDashboard() {
               {lb.length === 0 && <p className="muted small">Inga spelare än.</p>}
             </ol>
           </section>
+
+          {me.partyId && <VSocial partyId={me.partyId} />}
+
+          {state.alliances.length > 0 && (
+            <section className="card">
+              <h2>Aktiva samarbeten</h2>
+              <div className="v-alliances">
+                {state.alliances.slice(0, 8).map((a, i) => (
+                  <span key={i} className="v-alliance">
+                    <span className="v-party-mark v-lb-mark" style={{ background: getParty(a.party_a).color }}>
+                      {getParty(a.party_a).shortName}
+                    </span>
+                    🤝
+                    <span className="v-party-mark v-lb-mark" style={{ background: getParty(a.party_b).color }}>
+                      {getParty(a.party_b).shortName}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
 
           {me.achievements.length > 0 && (
             <section className="card">

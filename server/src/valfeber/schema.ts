@@ -6,12 +6,20 @@ import {
   seedSupportForValkrets,
   type World,
 } from './world.js';
+import { seedAiPlayers } from './simulation.js';
+
+// Migrationer for databaser som redan finns (idempotenta).
+const MIGRATIONS = [
+  'ALTER TABLE players ADD COLUMN IF NOT EXISTS is_ai boolean NOT NULL DEFAULT false',
+  'ALTER TABLE world ADD COLUMN IF NOT EXISTS last_sim_day integer NOT NULL DEFAULT -1',
+];
 
 const TABLES = `
 CREATE TABLE IF NOT EXISTS world (
   id int PRIMARY KEY,
   start_ts double precision NOT NULL,
-  end_ts double precision NOT NULL
+  end_ts double precision NOT NULL,
+  last_sim_day integer NOT NULL DEFAULT -1
 );
 CREATE TABLE IF NOT EXISTS players (
   id serial PRIMARY KEY,
@@ -26,6 +34,7 @@ CREATE TABLE IF NOT EXISTS players (
   last_active_day integer NOT NULL DEFAULT -1,
   actions_day integer NOT NULL DEFAULT -1,
   actions_left integer NOT NULL DEFAULT 3,
+  is_ai boolean NOT NULL DEFAULT false,
   created_ts double precision NOT NULL
 );
 CREATE TABLE IF NOT EXISTS support (
@@ -86,6 +95,7 @@ export async function initSchema(db: Db): Promise<World> {
     const s = stmt.trim();
     if (s) await db.query(s);
   }
+  for (const m of MIGRATIONS) await db.query(m);
 
   const existing = await db.query<{ start_ts: number; end_ts: number }>(
     'SELECT start_ts, end_ts FROM world WHERE id = 1',
@@ -109,6 +119,8 @@ export async function initSchema(db: Db): Promise<World> {
       }
     }
   }
+
+  await seedAiPlayers(db);
 
   const w = await db.query<{ start_ts: number; end_ts: number }>(
     'SELECT start_ts, end_ts FROM world WHERE id = 1',
