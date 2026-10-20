@@ -26,13 +26,14 @@ export function ResultToast() {
   const clear = useV((s) => s.clearResult);
 
   useEffect(() => {
-    if (result) {
+    if (result && !result.debate) {
       const t = setTimeout(clear, result.viral ? 3600 : 2400);
       return () => clearTimeout(t);
     }
   }, [result, clear]);
 
-  if (!result) return null;
+  // Debattresultat visas av VDebate (med egen dramatisk avslojning), inte som toast.
+  if (!result || result.debate) return null;
   return (
     <div className="v-result-overlay" onClick={clear}>
       {result.viral && <Confetti />}

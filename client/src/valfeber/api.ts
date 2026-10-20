@@ -18,6 +18,28 @@ export interface LeaderRow {
   streak: number;
 }
 
+export type DebateResponseType = 'fakta' | 'kansla' | 'motangrepp';
+
+export interface DebateRoundView {
+  id: string;
+  issue: string;
+  text: string;
+  responses: { type: DebateResponseType; text: string }[];
+}
+
+export interface DebateView {
+  opponentPartyId: string;
+  rounds: DebateRoundView[];
+}
+
+export interface DebateOutcome {
+  score: number; // 0..100
+  swings: number[]; // per runda, -10..+15
+  wins: number;
+  bestResponseIndex: number[];
+  opponentPartyId: string;
+}
+
 export interface ValfeberState {
   world: {
     day: number;
@@ -44,7 +66,7 @@ export interface ValfeberState {
   };
   leaderboards: { global: LeaderRow[]; party: LeaderRow[]; region: LeaderRow[] };
   alliances: { party_a: string; party_b: string }[];
-  debate: { id: string; topic: string; statement: string }[];
+  debate: DebateView | null;
   election: { redgron: number; tido: number; governingBloc: 'redgron' | 'tido' } | null;
 }
 
@@ -53,6 +75,7 @@ export interface ActionResultPayload {
   text: string;
   viral: boolean;
   newAchievements: string[];
+  debate?: DebateOutcome;
 }
 
 const BASE = '/api';

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { ANSWER_OPTIONS, Campaign, getParty, type AnswerKey } from '@dos/shared';
+import { Campaign, getParty } from '@dos/shared';
 import { useV } from '../store.js';
 import { useCountUp } from '../../hooks.js';
 import { RiksdagArc } from '../../components/campaign/RiksdagArc.js';
 import { VMap } from '../components/VMap.js';
 import { VSocial } from '../components/VSocial.js';
+import { VDebate } from '../components/VDebate.js';
 import type { ValfeberState } from '../api.js';
 
 const RIKSDAG = ['s', 'm', 'sd', 'v', 'c', 'kd', 'mp', 'l'];
@@ -205,7 +206,12 @@ export function VDashboard() {
         </aside>
       </div>
 
-      {openAction && <ActionModal kind={openAction} state={state} onClose={() => setOpenAction(null)} />}
+      {openAction === 'debate' && state.debate && (
+        <VDebate debate={state.debate} onClose={() => setOpenAction(null)} />
+      )}
+      {openAction && openAction !== 'debate' && (
+        <ActionModal kind={openAction} state={state} onClose={() => setOpenAction(null)} />
+      )}
     </div>
   );
 }
@@ -213,7 +219,6 @@ export function VDashboard() {
 function ActionModal({ kind, state, onClose }: { kind: string; state: ValfeberState; onClose: () => void }) {
   const doAction = useV((s) => s.doAction);
   const busy = useV((s) => s.busy);
-  const [answers, setAnswers] = useState<Record<string, AnswerKey>>({});
   const [slogan, setSlogan] = useState(0);
   const [region, setRegion] = useState(state.you.regionId ?? 'sthlm-stad');
   const [ally, setAlly] = useState<string | null>(null);
@@ -236,35 +241,6 @@ function ActionModal({ kind, state, onClose }: { kind: string; state: ValfeberSt
             <p className="muted small">Bemöt dagens händelse i din partis linje. Äger ditt parti frågan blir effekten större.</p>
             <button className="btn btn-primary btn-big" disabled={busy} onClick={() => run({})}>
               Hantera krisen
-            </button>
-          </>
-        )}
-
-        {kind === 'debate' && (
-          <>
-            {state.debate.map((q) => (
-              <div key={q.id} className="v-q">
-                <span className="v-q-topic">{q.topic}</span>
-                <p className="v-q-statement">”{q.statement}”</p>
-                <div className="v-q-opts">
-                  {ANSWER_OPTIONS.map((o) => (
-                    <button
-                      key={o.key}
-                      className={`btn btn-small ${answers[q.id] === o.key ? 'v-opt-on' : ''}`}
-                      onClick={() => setAnswers((a) => ({ ...a, [q.id]: o.key }))}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <button
-              className="btn btn-primary btn-big"
-              disabled={busy || state.debate.some((q) => !answers[q.id])}
-              onClick={() => run({ answers: state.debate.map((q) => answers[q.id]) })}
-            >
-              Leverera ditt svar
             </button>
           </>
         )}

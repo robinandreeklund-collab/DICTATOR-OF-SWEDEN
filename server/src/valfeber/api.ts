@@ -4,7 +4,8 @@ import type { Db } from './db.js';
 import { loadWorld, loadSupport } from './schema.js';
 import { login, playerByToken, register, type Player } from './auth.js';
 import { ensureSimulated } from './simulation.js';
-import { performAction, questionsForDay, setPartyAndRegion, type ActionKind } from './actions.js';
+import { performAction, setPartyAndRegion, type ActionKind } from './actions.js';
+import { getDebateFor } from './debate.js';
 import {
   getAchievements,
   getLeaderboard,
@@ -113,11 +114,21 @@ async function buildState(db: Db, player: Player) {
     },
     leaderboards: { global, party: partyLb, region: regionLb },
     alliances,
-    debate: questionsForDay(day).map((q) => ({
-      id: q.id,
-      topic: q.topic,
-      statement: q.statement,
-    })),
+    debate: player.party_id
+      ? (() => {
+          const setup = getDebateFor(day, player.party_id!, eventForDay(day).hotIssue);
+          return {
+            opponentPartyId: setup.opponentPartyId,
+            rounds: setup.rounds.map((a) => ({
+              id: a.id,
+              issue: a.issue,
+              text: a.text,
+              // Skicka svaren utan att avsloja vilket som ar bast.
+              responses: a.responses.map((r) => ({ type: r.type, text: r.text })),
+            })),
+          };
+        })()
+      : null,
     election,
   };
 }
@@ -186,7 +197,13 @@ export function createValfeberApi(db: Db): Router {
       return;
     }
     res.json({
-      result: { points: r.points, text: r.text, viral: r.viral, newAchievements: r.newAchievements },
+      result: {
+        points: r.points,
+        text: r.text,
+        viral: r.viral,
+        newAchievements: r.newAchievements,
+        debate: r.debateResult,
+      },
       state: await buildState(db, r.player!),
     });
   }));

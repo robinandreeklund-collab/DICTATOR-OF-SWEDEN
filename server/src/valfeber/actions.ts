@@ -1,12 +1,8 @@
-import {
-  ANSWER_MULTIPLIER,
-  Campaign,
-  VALKOMPASS_QUESTIONS,
-  type AnswerKey,
-} from '@dos/shared';
+import { Campaign } from '@dos/shared';
 import type { Db } from './db.js';
 import type { Player } from './auth.js';
 import { ACTIONS_PER_DAY, VALFEBER_PARTIES, currentDay, eventForDay, type World } from './world.js';
+import { getDebateFor, scoreDebate, type DebateResult } from './debate.js';
 
 export type ActionKind = 'debate' | 'viral' | 'regional' | 'crisis' | 'alliance';
 
@@ -18,6 +14,8 @@ export interface ActionResult {
   viral?: boolean;
   player?: Player;
   newAchievements?: string[];
+  /** Full debattresultat for dramatisk avslojning i klienten. */
+  debateResult?: DebateResult & { opponentPartyId: string };
 }
 
 const SLOGANS = [
@@ -28,12 +26,6 @@ const SLOGANS = [
   'Din rost gor skillnad',
   'Ett varmare samhalle',
 ];
-
-/** Tre debattfragor for en given dag (deterministiskt). */
-export function questionsForDay(day: number): typeof VALKOMPASS_QUESTIONS {
-  const n = VALKOMPASS_QUESTIONS.length;
-  return [0, 1, 2].map((i) => VALKOMPASS_QUESTIONS[(day * 3 + i) % n]);
-}
 
 async function addSupport(db: Db, partyId: string, valkretsId: string, amount: number): Promise<void> {
   await db.query(
@@ -92,7 +84,7 @@ export async function setPartyAndRegion(
 }
 
 interface ActionPayload {
-  answers?: AnswerKey[];
+  answers?: number[];
   sloganIndex?: number;
   valkretsId?: string;
   allyPartyId?: string;
@@ -125,23 +117,24 @@ export async function performAction(
   let text = '';
   let viral = false;
   const ach: string[] = [];
+  let debateResult: (DebateResult & { opponentPartyId: string }) | undefined;
 
   if (kind === 'debate') {
-    const qs = questionsForDay(day);
-    const answers = payload.answers ?? [];
-    let raw = 0;
-    let max = 0;
-    qs.forEach((q, i) => {
-      const eff = q.effects[party] ?? 0;
-      max += Math.abs(eff);
-      const mult = ANSWER_MULTIPLIER[answers[i]] ?? 0;
-      raw += eff * mult;
-    });
-    const score = max > 0 ? Math.max(0, raw / max) : 0.5;
-    points = Math.round(12 + score * 40);
-    support = 1.5 + score * 3;
+    const setup = getDebateFor(day, party, event.hotIssue);
+    const result = scoreDebate(payload.answers ?? [], setup);
+    debateResult = { ...result, opponentPartyId: setup.opponentPartyId };
+    points = Math.round(5 + result.score * 0.5);
+    support = 1 + result.score * 0.05;
     await addSupport(db, party, region, support);
-    text = `Du svarade i debatten och overtygade valjarna (${Math.round(score * 100)}% traff).`;
+    const flavor =
+      result.wins === 4 ? 'Totalseger! Du dominerade debatten.'
+      : result.wins === 3 ? 'Du vann debatten klart.'
+      : result.wins === 2 ? 'Oavgjord debatt - hederlig insats.'
+      : result.wins === 1 ? 'Du forlorade debatten.'
+      : 'Debaklet - publiken bytte sida helt.';
+    text = `Debatt mot ${setup.opponentPartyId.toUpperCase()}: ${result.wins}/4 ratt. ${flavor}`;
+    if (result.wins === 4 && (await awardAchievement(db, player.id, 'debattmastare')))
+      ach.push('debattmastare');
   } else if (kind === 'viral') {
     viral = Math.random() < 0.3;
     const slogan = SLOGANS[payload.sloganIndex ?? 0] ?? SLOGANS[0];
@@ -197,5 +190,5 @@ export async function performAction(
   if (player.streak >= 7 && (await awardAchievement(db, player.id, 'streak7'))) ach.push('streak7');
 
   player = { ...player, points: player.points + points, actions_left: player.actions_left - 1 };
-  return { ok: true, points, text, viral, player, newAchievements: ach };
+  return { ok: true, points, text, viral, player, newAchievements: ach, debateResult };
 }
