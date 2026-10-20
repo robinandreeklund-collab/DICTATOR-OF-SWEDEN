@@ -18,6 +18,84 @@ export interface LeaderRow {
   streak: number;
 }
 
+export type CrisisStep = 'statement' | 'press' | 'close';
+export type Archetype = 'fornekande' | 'offensiv' | 'erkannande';
+
+export interface CrisisChoice {
+  id: string;
+  archetype: Archetype;
+  label: string;
+  blurb: string;
+}
+
+export interface CrisisStepPack {
+  prompt: string;
+  choices: CrisisChoice[];
+}
+
+export interface CrisisScript {
+  statement: CrisisStepPack;
+  press: CrisisStepPack;
+  close: CrisisStepPack;
+}
+
+export interface CrisisOutcome {
+  score: number;
+  points: number;
+  support: number;
+  text: string;
+  picks: { step: CrisisStep; choice: CrisisChoice }[];
+}
+
+export interface AllianceDemand {
+  id: string;
+  topic: string;
+  text: string;
+}
+
+export interface AllianceOffer {
+  allyPartyId: string;
+  demands: AllianceDemand[];
+  compat: number;
+}
+
+export interface AllianceOutcome {
+  deal: boolean;
+  allyPartyId: string;
+  accepted: boolean[];
+  score: number;
+  points: number;
+  support: number;
+  text: string;
+}
+
+export type Demographic = 'pensionarer' | 'arbetstagare' | 'unga' | 'barnfamiljer';
+
+export interface RegionalOutcome {
+  valkretsId: string;
+  perDemo: Record<Demographic, number>;
+  totalEffect: number;
+  supportDelta: number;
+}
+
+export type Emotion = 'hopp' | 'oro' | 'humor';
+export type Angle = 'loften' | 'attack' | 'personligt';
+export type PostFormat = 'bildcitat' | 'video' | 'trad';
+
+export interface ViralBreakdown {
+  score: number;
+  viral: boolean;
+  breakdown: {
+    bas: number;
+    emotion: number;
+    angle: number;
+    format: number;
+    frage: number;
+    slump: number;
+  };
+  prefHint: { emotion: Emotion; angle: Angle; format: PostFormat };
+}
+
 export type DebateResponseType = 'fakta' | 'kansla' | 'motangrepp';
 
 export interface DebateRoundView {
@@ -67,6 +145,7 @@ export interface ValfeberState {
   leaderboards: { global: LeaderRow[]; party: LeaderRow[]; region: LeaderRow[] };
   alliances: { party_a: string; party_b: string }[];
   debate: DebateView | null;
+  crisis: CrisisScript;
   election: { redgron: number; tido: number; governingBloc: 'redgron' | 'tido' } | null;
 }
 
@@ -76,6 +155,10 @@ export interface ActionResultPayload {
   viral: boolean;
   newAchievements: string[];
   debate?: DebateOutcome;
+  viralBreakdown?: ViralBreakdown;
+  regional?: RegionalOutcome;
+  crisis?: CrisisOutcome;
+  alliance?: AllianceOutcome;
 }
 
 const BASE = '/api';
@@ -141,6 +224,12 @@ export const api = {
     req<{ ok: boolean }>(
       '/chat',
       { method: 'POST', body: JSON.stringify({ scope, scopeId, body }) },
+      token,
+    ),
+  allianceOffer: (token: string, allyPartyId: string) =>
+    req<{ offer: AllianceOffer }>(
+      `/alliance/${encodeURIComponent(allyPartyId)}`,
+      { method: 'GET' },
       token,
     ),
 };

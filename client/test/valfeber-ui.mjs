@@ -35,13 +35,18 @@ try {
   if (!(await has('.v-map-svg'))) fail('Kartan saknas.');
   console.log('  Dashboard, riksdagsgrafik, atgarder och karta renderade.');
 
-  // Utfor en atgard (kris)
+  // Utfor krisatgarden - nu ett 3-stegs minispel
   await page.locator('.v-action-card').first().click();
-  await page.locator('.v-modal').waitFor({ timeout: 5000 });
-  await page.getByRole('button', { name: 'Hantera krisen' }).click();
+  await page.locator('.v-crisis').waitFor({ timeout: 5000 });
+  // Valj forsta alternativet i varje steg
+  for (let i = 0; i < 3; i++) {
+    await page.locator('.v-crisis-choice').first().click();
+    await page.waitForTimeout(200);
+  }
+  await page.getByRole('button', { name: 'Lås krishanteringen' }).click();
   await page.locator('.v-result').waitFor({ timeout: 6000 });
   const pts = await page.locator('.v-result-points').textContent();
-  console.log(`  Atgard utford, resultat: ${pts?.trim()}`);
+  console.log(`  Krisatgard utford, resultat: ${pts?.trim()}`);
 
   // Vanta tills resultatet fortsvinner, kontrollera topplistan
   await page.waitForTimeout(2800);

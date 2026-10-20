@@ -44,22 +44,29 @@ async function main() {
   const sBefore = before['sthlm-stad'].s;
 
   const a1 = await performAction(db, world, player, 'debate', {
-    answers: ['helt', 'helt', 'helt'],
+    answers: [0, 0, 0, 0],
   });
   assert(a1.ok && (a1.points ?? 0) > 0, 'debatt misslyckades');
   player = a1.player!;
   assert(player.actions_left === 2, `actions_left borde vara 2, var ${player.actions_left}`);
 
-  const a2 = await performAction(db, world, player, 'regional', { valkretsId: 'goteborg' });
+  const a2 = await performAction(db, world, player, 'regional', {
+    valkretsId: 'goteborg',
+    allocation: { pensionarer: 3, arbetstagare: 4, unga: 2, barnfamiljer: 1 },
+  });
   assert(a2.ok, 'regional misslyckades');
   player = a2.player!;
 
-  const a3 = await performAction(db, world, player, 'crisis', {});
+  const a3 = await performAction(db, world, player, 'crisis', {
+    crisisChoices: { statement: 's-erk', press: 'p-erk', close: 'c-erk' },
+  });
   assert(a3.ok, 'kris misslyckades');
   player = a3.player!;
   assert(player.actions_left === 0, 'borde vara slut pa atgarder');
 
-  const a4 = await performAction(db, world, player, 'viral', { sloganIndex: 1 });
+  const a4 = await performAction(db, world, player, 'viral', {
+    emotion: 'hopp', angle: 'loften', format: 'bildcitat',
+  });
   assert(!a4.ok, 'fjarde atgarden borde nekas (slut pa atgarder)');
   console.log('  Atgarder: 3/dag, fjarde nekas, poang ges OK.');
 
@@ -135,7 +142,7 @@ async function main() {
   // Valnatt
   const pastWorld = { start_ts: Date.now() - 20 * 86_400_000, end_ts: Date.now() - 1000 };
   assert(isElectionOver(pastWorld) === true, 'valet borde vara over');
-  const a5 = await performAction(db, pastWorld, player, 'debate', { answers: ['helt'] });
+  const a5 = await performAction(db, pastWorld, player, 'debate', { answers: [0] });
   assert(!a5.ok, 'inga atgarder efter valdagen');
   console.log('  Valnatt: spelet stanger for atgarder OK.');
 

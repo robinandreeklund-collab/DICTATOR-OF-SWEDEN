@@ -6,16 +6,15 @@ import { RiksdagArc } from '../../components/campaign/RiksdagArc.js';
 import { VMap } from '../components/VMap.js';
 import { VSocial } from '../components/VSocial.js';
 import { VDebate } from '../components/VDebate.js';
-import type { ValfeberState } from '../api.js';
+import { VViral } from '../components/VViral.js';
+import { VRegional } from '../components/VRegional.js';
+import { VCrisis } from '../components/VCrisis.js';
+import { VAlliance } from '../components/VAlliance.js';
 
-const RIKSDAG = ['s', 'm', 'sd', 'v', 'c', 'kd', 'mp', 'l'];
-const SLOGANS = [
-  'Trygghet i hela landet', 'Framtiden byggs nu', 'Rättvisa för vanligt folk',
-  'Sverige kan bättre', 'Din röst gör skillnad', 'Ett varmare samhälle',
-];
 const ACH_LABEL: Record<string, string> = {
   first_action: 'Första steget', viral: 'Gick viralt',
   allians: 'Alliansbyggare', streak7: '7 dagar i rad',
+  debattmastare: 'Debattmästare',
 };
 const ACTIONS = [
   { kind: 'crisis', icon: '🔥', label: 'Hantera dagens kris', desc: 'Störst effekt — vänd opinionen.' },
@@ -209,91 +208,18 @@ export function VDashboard() {
       {openAction === 'debate' && state.debate && (
         <VDebate debate={state.debate} onClose={() => setOpenAction(null)} />
       )}
-      {openAction && openAction !== 'debate' && (
-        <ActionModal kind={openAction} state={state} onClose={() => setOpenAction(null)} />
+      {openAction === 'viral' && (
+        <VViral onClose={() => setOpenAction(null)} />
       )}
-    </div>
-  );
-}
-
-function ActionModal({ kind, state, onClose }: { kind: string; state: ValfeberState; onClose: () => void }) {
-  const doAction = useV((s) => s.doAction);
-  const busy = useV((s) => s.busy);
-  const [slogan, setSlogan] = useState(0);
-  const [region, setRegion] = useState(state.you.regionId ?? 'sthlm-stad');
-  const [ally, setAlly] = useState<string | null>(null);
-
-  const run = async (payload: Record<string, unknown>) => {
-    await doAction(kind, payload);
-    onClose();
-  };
-
-  const title = ACTIONS.find((a) => a.kind === kind)?.label ?? 'Åtgärd';
-
-  return (
-    <div className="v-modal-overlay" onClick={onClose}>
-      <div className="v-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{title}</h2>
-
-        {kind === 'crisis' && (
-          <>
-            <p>{state.event.body}</p>
-            <p className="muted small">Bemöt dagens händelse i din partis linje. Äger ditt parti frågan blir effekten större.</p>
-            <button className="btn btn-primary btn-big" disabled={busy} onClick={() => run({})}>
-              Hantera krisen
-            </button>
-          </>
-        )}
-
-        {kind === 'viral' && (
-          <>
-            <p className="muted small">Välj ditt budskap. Chansen finns att det går viralt.</p>
-            <div className="v-slogans">
-              {SLOGANS.map((s, i) => (
-                <button key={i} className={`btn ${slogan === i ? 'v-opt-on' : ''}`} onClick={() => setSlogan(i)}>
-                  ”{s}”
-                </button>
-              ))}
-            </div>
-            <button className="btn btn-primary btn-big" disabled={busy} onClick={() => run({ sloganIndex: slogan })}>
-              Posta
-            </button>
-          </>
-        )}
-
-        {kind === 'regional' && (
-          <>
-            <p className="muted small">Välj var du lägger din kampanjkraft.</p>
-            <select className="team-party-select" value={region} onChange={(e) => setRegion(e.target.value)}>
-              {Campaign.VALKRETSAR.map((v) => (
-                <option key={v.id} value={v.id}>{v.name} ({v.mandate} mandat)</option>
-              ))}
-            </select>
-            <button className="btn btn-primary btn-big" disabled={busy} onClick={() => run({ valkretsId: region })}>
-              Kampanja här
-            </button>
-          </>
-        )}
-
-        {kind === 'alliance' && (
-          <>
-            <p className="muted small">Vilket parti vill du samarbeta med?</p>
-            <div className="v-ally-grid">
-              {RIKSDAG.filter((p) => p !== state.you.partyId).map((p) => (
-                <button key={p} className={`btn ${ally === p ? 'v-opt-on' : ''}`} onClick={() => setAlly(p)}>
-                  <span className="v-party-mark" style={{ background: getParty(p).color }}>{getParty(p).shortName}</span>
-                  {getParty(p).name}
-                </button>
-              ))}
-            </div>
-            <button className="btn btn-primary btn-big" disabled={busy || !ally} onClick={() => run({ allyPartyId: ally })}>
-              Förhandla
-            </button>
-          </>
-        )}
-
-        <button className="btn btn-ghost" onClick={onClose}>Avbryt</button>
-      </div>
+      {openAction === 'regional' && (
+        <VRegional onClose={() => setOpenAction(null)} />
+      )}
+      {openAction === 'crisis' && (
+        <VCrisis onClose={() => setOpenAction(null)} />
+      )}
+      {openAction === 'alliance' && (
+        <VAlliance onClose={() => setOpenAction(null)} />
+      )}
     </div>
   );
 }

@@ -1172,3 +1172,193 @@ input[type='text'], input:not([type]), .field input {
   .v-dc-text { grid-column: 1 / -1; }
   .v-debate-vs { grid-template-columns: 1fr; }
 }
+
+/* --- Valfeber: viral post ---------------------------------------------- */
+.v-viral { max-width: 560px; }
+.v-viral-row { margin: 12px 0; }
+.v-viral-label {
+  font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--gold); margin-bottom: 6px;
+}
+.v-viral-choices {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.v-viral-choice {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 6px; border-radius: 10px; cursor: pointer;
+  background: var(--bg3); border: 2px solid var(--border); color: var(--text);
+  transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+  text-align: center;
+}
+.v-viral-choice:hover { transform: translateY(-2px); border-color: var(--gold); }
+.v-vc-on { border-color: var(--gold) !important; background: #25365a; }
+.v-vc-icon { font-size: 1.6rem; }
+.v-vc-label { font-weight: 700; font-size: 0.88rem; }
+.v-vc-hint { font-size: 0.7rem; color: var(--muted); }
+
+.v-viral-preview {
+  margin: 16px 0; padding: 14px; border-radius: 12px;
+  background: #0f1a2e; border: 1.5px solid var(--border); border-left-width: 4px;
+  animation: riseIn 0.3s ease both;
+}
+.v-viral-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.v-viral-head .v-party-mark {
+  width: 36px; height: 36px; min-width: 36px; font-size: 0.85rem;
+}
+.v-viral-body {
+  margin: 0 0 8px; font-family: Georgia, serif; font-size: 1rem;
+  color: #d5dcea; line-height: 1.4;
+}
+.v-viral-stats {
+  display: flex; gap: 14px; font-size: 0.78rem; color: var(--muted);
+  padding-top: 8px; border-top: 1px solid var(--border);
+}
+
+@media (max-width: 500px) {
+  .v-viral-choices { grid-template-columns: 1fr; }
+}
+
+/* --- Valfeber: regional kampanj --------------------------------------- */
+.v-regional { max-width: 560px; }
+.v-reg-hours {
+  display: flex; align-items: center; gap: 10px; margin: 12px 0;
+  font-size: 0.88rem; color: #d5dcea;
+}
+.v-reg-hours-bar {
+  flex: 1; height: 10px; background: var(--bg); border-radius: 5px;
+  border: 1px solid var(--border); overflow: hidden;
+}
+.v-reg-hours-fill { height: 100%; transition: width 0.3s ease; }
+.v-reg-demos { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.v-reg-demo {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+}
+.v-reg-demo-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.v-reg-demo-icon { font-size: 1.3rem; }
+.v-reg-demo-label { font-weight: 700; flex: 1; }
+.v-reg-fit {
+  font-size: 0.74rem; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.v-reg-fit-strong { color: var(--dem); border-color: var(--dem); }
+.v-reg-fit-good   { color: #7ac77f; border-color: #7ac77f; }
+.v-reg-fit-neu    { color: var(--muted); }
+.v-reg-fit-weak   { color: var(--nej); border-color: var(--nej); }
+.v-reg-demo-ctrl {
+  display: flex; align-items: center; gap: 10px;
+}
+.v-reg-demo-hrs { min-width: 36px; text-align: center; color: var(--gold); }
+.v-reg-demo-eff { flex: 1; text-align: right; }
+.v-reg-preview {
+  margin: 14px 0 10px; padding: 10px 12px; border-radius: 10px;
+  border: 1.5px solid var(--border); border-left-width: 4px;
+  background: var(--bg3); font-size: 0.9rem;
+}
+
+/* --- Valfeber: krishantering ------------------------------------------ */
+.v-crisis { max-width: 580px; }
+.v-crisis-news {
+  padding: 10px 12px; margin: 8px 0 12px;
+  background: linear-gradient(120deg, #3a2321, #221717);
+  border: 1px solid var(--aut); border-radius: 10px;
+}
+.v-crisis-news strong { color: #f4a98c; display: block; margin-bottom: 4px; }
+.v-crisis-news p { margin: 0 0 4px; color: #d5dcea; }
+.v-crisis-timeline {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin-bottom: 14px;
+}
+.v-crisis-step {
+  flex: 1; padding: 8px; border-radius: 10px;
+  background: var(--bg3); border: 1.5px solid var(--border);
+  opacity: 0.55; transition: opacity 0.2s ease, border-color 0.2s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+.v-cs-active {
+  opacity: 1; border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(216, 177, 90, 0.15);
+}
+.v-cs-done { opacity: 1; border-color: var(--dem); }
+.v-cs-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: var(--gold); font-size: 0.82rem;
+}
+.v-cs-info { flex: 1; min-width: 0; }
+.v-cs-label { font-size: 0.76rem; color: var(--muted); }
+.v-cs-pick {
+  font-size: 0.82rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.v-crisis-stage { animation: riseIn 0.3s ease both; }
+.v-crisis-prompt {
+  font-family: Georgia, serif; font-size: 1.02rem; margin: 10px 0;
+}
+.v-crisis-choices { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.v-crisis-choice {
+  display: flex; flex-direction: column; gap: 4px; text-align: left;
+  padding: 10px 14px; border-radius: 10px; cursor: pointer;
+  background: var(--bg3); color: var(--text);
+  border: 1.5px solid var(--border); border-left-width: 4px;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.v-crisis-choice:hover { transform: translateX(3px); background: #25365a; }
+.v-cc-head { display: flex; align-items: center; gap: 8px; }
+.v-cc-icon { font-size: 1.2rem; }
+.v-cc-blurb { font-size: 0.84rem; color: #d5dcea; font-style: italic; }
+
+/* --- Valfeber: allians-forhandling ------------------------------------ */
+.v-alliance { max-width: 580px; }
+.v-alliance-partners {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px; margin: 10px 0;
+}
+.v-alliance-partner {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px; border-radius: 10px; cursor: pointer; text-align: center;
+  background: var(--bg3); border: 2px solid var(--border); color: var(--text);
+  transition: transform 0.1s ease;
+  min-width: 0;
+}
+.v-alliance-partner:hover:not(:disabled) { transform: translateY(-2px); }
+.v-alliance-partner .v-party-mark {
+  width: 40px; height: 40px; min-width: 40px; font-size: 0.95rem;
+}
+.v-ap-name { font-weight: 600; font-size: 0.86rem; }
+.v-ap-leader { font-size: 0.72rem; }
+.v-ap-chosen {
+  display: grid !important;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+  text-align: left !important;
+  cursor: default; margin: 8px 0 14px;
+  padding: 12px;
+}
+.v-ap-chosen .v-party-mark { grid-row: 1 / span 2; }
+.v-ap-chosen:hover { transform: none; }
+.v-ap-chosen .v-ap-name { font-size: 1rem; }
+.v-ap-chosen .v-ap-leader { font-size: 0.78rem; }
+.v-alliance-demands { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
+.v-alliance-demand {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--bg3); border: 1.5px solid var(--border);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.v-ad-on { border-color: var(--dem); background: #1f3a2c; }
+.v-ad-text { display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; min-width: 0; }
+.v-ad-topic {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--gold);
+}
+.v-alliance-predict {
+  margin: 10px 0; padding: 10px 12px; border-radius: 10px;
+  background: var(--bg3); border: 1px solid var(--gold); text-align: center;
+}

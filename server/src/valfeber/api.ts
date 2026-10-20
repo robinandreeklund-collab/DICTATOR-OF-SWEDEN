@@ -6,6 +6,8 @@ import { login, playerByToken, register, type Player } from './auth.js';
 import { ensureSimulated } from './simulation.js';
 import { performAction, setPartyAndRegion, type ActionKind } from './actions.js';
 import { getDebateFor } from './debate.js';
+import { CRISIS_SCRIPT } from './crisis.js';
+import { getAllianceOffer } from './alliance.js';
 import {
   getAchievements,
   getLeaderboard,
@@ -129,6 +131,11 @@ async function buildState(db: Db, player: Player) {
           };
         })()
       : null,
+    crisis: {
+      statement: CRISIS_SCRIPT.statement,
+      press: CRISIS_SCRIPT.press,
+      close: CRISIS_SCRIPT.close,
+    },
     election,
   };
 }
@@ -203,9 +210,31 @@ export function createValfeberApi(db: Db): Router {
         viral: r.viral,
         newAchievements: r.newAchievements,
         debate: r.debateResult,
+        viralBreakdown: r.viralResult,
+        regional: r.regionalResult,
+        crisis: r.crisisResult,
+        alliance: r.allianceResult,
       },
       state: await buildState(db, r.player!),
     });
+  }));
+
+  // Hamta nuvarande allians-erbjudande fran ett specifikt parti.
+  router.get('/alliance/:ally', h(async (req, res) => {
+    const player = await auth(req, res);
+    if (!player) return;
+    if (!player.party_id) {
+      res.status(400).json({ error: 'Valj parti forst.' });
+      return;
+    }
+    const world = await loadWorld(db);
+    const day = currentDay(world);
+    const offer = getAllianceOffer(day, player.party_id, req.params.ally);
+    if (!offer) {
+      res.status(400).json({ error: 'Ogiltigt allianspartner.' });
+      return;
+    }
+    res.json({ offer });
   }));
 
   router.get('/leaderboard', h(async (req, res) => {
